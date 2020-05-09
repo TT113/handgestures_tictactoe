@@ -4,20 +4,8 @@ from game_logic.user_cursor_controller import UserCursorController
 from model.game_state import GameState
 from model.input import Input
 from model.move_result import MoveResult
+from model.player import Player
 from model.scene_render_model import SceneModel
-
-
-# class InputReceiver:
-#     def __init__(self):
-#         self.input_command = Input.NO_INPUT
-#
-#     def set_input(self, input):
-#         self.input_command = input
-#
-#     def get_input(self):
-#         current_input = self.input_command
-#         self.input_command = Input.NO_INPUT
-#         return current_input
 
 class TicTacToeDefault33Scene:
 
@@ -47,3 +35,12 @@ class TicTacToeDefault33Scene:
 
     def get_render_model(self):
         return SceneModel(self.game.state, self.user_cursor_controller.cursor_position)
+
+    def __create_filtered_controller(self, player):
+        def controller(input):
+            if self.game.state.turn == player:
+                self.receive_input(input)
+        return controller
+
+    def get_input_controllers(self):
+        return self.__create_filtered_controller(Player.X), self.__create_filtered_controller(Player.O)

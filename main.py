@@ -53,6 +53,14 @@ class SceneUpdateWrapper:
         self.update_lambda(game_state)
 
 
+class Executor:
+    def __init__(self, executed_fn):
+        self.executed_fn = executed_fn
+
+    def tick(self):
+        self.executed_fn()
+
+
 class KeyboardInputUpdater:
     def __init__(self, scene):
         self.scene = scene
@@ -82,9 +90,16 @@ renderer = PyGameRenderer()
 renderer.setup_with_field(scene.get_render_model().game_state)
 tick_generator = TickGenerator(60)
 tick_generator.add_subscriber(KeyboardInputUpdater(scene))
+tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
 
-scene_state_subject.attach(SceneUpdateWrapper(lambda x: renderer.render(x)))
+# render on scene state change
+# scene_state_subject.attach(SceneUpdateWrapper(lambda x: renderer.render(x)), True)
 scene_state_subject.attach(InputterX(scene), True)
 # scene_state_subject.attach(InputterO(scene), True)
+input_x, input_o = scene.get_input_controllers()
+# input_x(Input.ENTER)
+# input_o(Input.ENTER)
+
 
 tick_generator.run_ticks()
+
