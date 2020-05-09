@@ -19,8 +19,8 @@ def convert_frame_to_gray_scale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
-def perform_gaussian_blur(frame):
-    return cv2.GaussianBlur(frame, (constants.GAUSSIAN_BLUR_VAL, constants.GAUSSIAN_BLUR_VAL), 0)
+def perform_gaussian_blur(frame, constant):
+    return cv2.GaussianBlur(frame, (constant, constant), 0)
 
 
 def smooth_frame(frame):
@@ -29,7 +29,7 @@ def smooth_frame(frame):
 
 
 def extract_contours_from_image(img):
-    contours, hierarchy = cv2.findContours(copy.deepcopy(img), cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_L1)
+    contours, hierarchy = cv2.findContours(copy.deepcopy(img), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
 

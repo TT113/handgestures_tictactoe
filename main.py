@@ -102,7 +102,7 @@ tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_
 
 # render on scene state change
 # scene_state_subject.attach(SceneUpdateWrapper(lambda x: renderer.render(x)), True)
-scene_state_subject.attach(InputterX(scene), True)
+# scene_state_subject.attach(InputterX(scene), True)
 # scene_state_subject.attach(InputterO(scene), True)
 input_x, input_o = scene.get_input_controllers()
 # input_x(Input.ENTER)

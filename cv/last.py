@@ -24,11 +24,16 @@ while camera.is_recording():
                                   (int(constants.ROI_X_BEGIN * img.shape[1]), img.shape[1]))
         cv_utils.show_frame(img, "mask")
         gray = cv_utils.convert_frame_to_gray_scale(img)
-        blur = cv_utils.perform_gaussian_blur(gray)
+        blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_VAL)
+        low_blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_FINGERS_COUNT)
         _, thresh = cv2.threshold(blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
+        _, thresh2 = cv2.threshold(low_blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
         cv_utils.show_frame(thresh, "filtered")
         contours = cv_utils.extract_contours_from_image(thresh)
+        contours_fingers = cv_utils.extract_contours_from_image(thresh2)
         external_contour = geometry_utils.select_external_contour(contours)
+        external_contour_fingers = geometry_utils.select_external_contour(contours_fingers)
+        external_without_blur_contour = geometry_utils.select_external_contour(contours)
         hull = cv_utils.get_convex_hull(external_contour)
         # hull = external_contour
         hull = geometry_utils.validate_convex_hull(hull, (img.shape[0], img.shape[1]))
@@ -49,6 +54,8 @@ while camera.is_recording():
                 cv_utils.draw_point(frame, tuple(map(sum, zip(input, offset))))
                 command = str(geometry_utils.get_vector_direction(input - np.array(center1)))
                 cv_utils.draw_text(frame, (40, 40), command)
+            else:
+                external_contour_fingers
         cv2.imshow('output', frame)
 
     k = cv2.waitKey(10)

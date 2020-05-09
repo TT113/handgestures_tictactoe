@@ -6,6 +6,8 @@ import cv.constants as constants
 import cv.geometry_utils as geometry_utils
 import cv.input_generator as input_generator
 import cv.image_background_remove as image_background_remove
+import math
+from model.input import *
 
 # camera = camera.Camera()
 # imageBackgroundRemover = None
@@ -79,6 +81,31 @@ class CvInputConroller:
         self.imageBackgroundRemover = image_background_remove.ImageBackgroundRemover()
         print('calibrated')
 
+    def calculateFingers(self, res, offset, drawing):  # -> finished bool, cnt: finger count
+        #  convexity defect
+        hull = cv2.convexHull(res, returnPoints=False)
+        if len(hull) > 3:
+            defects = cv2.convexityDefects(res, hull)
+            if type(defects) != type(None):  # avoid crashing.   (BUG not found)
+                cnt = 0
+                for i in range(defects.shape[0]):  # calculate the angle
+                    s, e, f, d = defects[i][0]
+                    start = tuple(res[s][0])
+                    end = tuple(res[e][0])
+                    far = tuple(res[f][0])
+                    a = math.sqrt((end[0] - start[0]) ** 2 +
+                                  (end[1] - start[1]) ** 2)
+                    b = math.sqrt((far[0] - start[0]) ** 2 +
+                                  (far[1] - start[1]) ** 2)
+                    c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
+                    angle = math.acos((b ** 2 + c ** 2 - a ** 2) /
+                                      (2 * b * c))  # cosine theorem
+                    if angle <= math.pi / 2:  # angle less than 90 degree, treat as fingers
+                        cnt += 1
+                        cv2.circle(drawing, tuple(map(sum, zip(far, offset))), 8, [211, 84, 0], -1)
+                return True, cnt
+        return False, 0
+
     def tick(self):
         frame = self.camera.get_current_frame()
         frame = cv_utils.smooth_frame(frame)
@@ -90,17 +117,21 @@ class CvInputConroller:
             img = cv_utils.crop_frame(img,
                                       (0, int(constants.ROI_Y_END * img.shape[0])),
                                       (int(constants.ROI_X_BEGIN * img.shape[1]), img.shape[1]))
-            cv_utils.show_frame(img, "mask")
+            # cv_utils.show_frame(img, "mask")
             gray = cv_utils.convert_frame_to_gray_scale(img)
-            blur = cv_utils.perform_gaussian_blur(gray)
+            blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_VAL)
+            # cv2.imshow('blur', blur)
+            low_blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_FINGERS_COUNT)
             _, thresh = cv2.threshold(blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
-            cv_utils.show_frame(thresh, "filtered")
+            _, thresh2 = cv2.threshold(low_blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
+            # cv_utils.show_frame(thresh, "filtered")
             contours = cv_utils.extract_contours_from_image(thresh)
+            contours_fingers = cv_utils.extract_contours_from_image(thresh2)
             external_contour = geometry_utils.select_external_contour(contours)
+            external_contour_fingers = geometry_utils.select_external_contour(contours_fingers)
             hull = cv_utils.get_convex_hull(external_contour)
             # hull = external_contour
             hull = geometry_utils.validate_convex_hull(hull, (img.shape[0], img.shape[1]))
-
             if hull is not None:
                 offset = (int(constants.ROI_X_BEGIN * frame.shape[1]), 0)
                 polygon_angles = geometry_utils.get_polygon_angles(hull)
@@ -121,6 +152,12 @@ class CvInputConroller:
                     if game_command is not None:
                         self.make_input(game_command)
                     cv_utils.draw_text(frame, (40, 40), command)
+                else:
+                    _, finger_count = self.calculateFingers(external_contour_fingers, offset, frame)
+                    if finger_count >= 3:
+                        self.make_input(Input.ENTER)
+
+
             cv2.imshow('output', frame)
 
     def make_input(self, command):
@@ -128,3 +165,5 @@ class CvInputConroller:
         if current_timestamp - self.last_input_submitted > self.input_quantization_seconds:
             self.scene.receive_input(command)
             self.last_input_submitted = current_timestamp
+        self.scene.receive_input(command)
+
