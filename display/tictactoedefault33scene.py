@@ -4,16 +4,28 @@ from game_logic.user_cursor_controller import UserCursorController
 from model.game_state import GameState
 from model.input import Input
 from model.move_result import MoveResult
-from model.scene_render_model import SceneRenderModel
+from model.scene_render_model import SceneModel
 
+
+# class InputReceiver:
+#     def __init__(self):
+#         self.input_command = Input.NO_INPUT
+#
+#     def set_input(self, input):
+#         self.input_command = input
+#
+#     def get_input(self):
+#         current_input = self.input_command
+#         self.input_command = Input.NO_INPUT
+#         return current_input
 
 class TicTacToeDefault33Scene:
 
-    def __init__(self):
-        game_state = GameState(3, 3)
-        self.game = TicTacToeGame(game_state, TicTacToeDefaultWinnerCheckStrategy())
-        self.last_move_result = MoveResult.GAME_NOT_STARTED
+    def __init__(self, game_changed_callback):
+        game_state = GameState.get_default_with_field(3,3)
+        self.game = TicTacToeGame(game_state, TicTacToeDefaultWinnerCheckStrategy(), self.game_changed_callback)
         self.user_cursor_controller = UserCursorController(game_state)
+        self.scene_changed_callback = game_changed_callback
 
     def receive_input(self, input):
         if input == Input.BOTTOM_ARROW:
@@ -26,7 +38,12 @@ class TicTacToeDefault33Scene:
             self.user_cursor_controller.input_arrow_up()
 
         if input == Input.ENTER:
-            self.last_move_result = self.game.make_move(self.user_cursor_controller.cursor_position)
+            self.game.make_move(self.user_cursor_controller.cursor_position)
+        else:
+            self.game_changed_callback(self.game.state)
+
+    def game_changed_callback(self, game_state):
+        self.scene_changed_callback(SceneModel(game_state, self.user_cursor_controller.cursor_position))
 
     def get_render_model(self):
-        return SceneRenderModel(self.game.controller.state, self.user_cursor_controller.cursor_position, self.last_move_result)
+        return SceneModel(self.game.state, self.user_cursor_controller.cursor_position)

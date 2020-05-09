@@ -3,24 +3,43 @@ import time
 from model.input import Input
 
 
-class Engine:
-    def __init__(self, scene, renderer):
-        self.scene = scene
-        self.renderer = renderer
-        # test cell occupied
-        # self.actions = [Input.ENTER, Input.ENTER]
+# class Engine:
+#     def __init__(self, scene, renderer):
+#         self.scene = scene
+#         self.renderer = renderer
+#         self.renderer.setup_with_field(scene.get_render_model().game_state)
 
-        #test move cursor
-        # self.actions = [Input.ENTER, Input.RIGHT_ARROW, Input.ENTER]
+    # def tick(self):
+    #     model = self.scene.get_render_model()
+    #     self.renderer.render(model)
 
-        #test win X
-        self.actions = [Input.ENTER, Input.RIGHT_ARROW, Input.ENTER, Input.BOTTOM_ARROW, Input.ENTER, Input.RIGHT_ARROW, Input.ENTER, Input.BOTTOM_ARROW, Input.ENTER]
 
-    def run_loop(self):
+class TickSplitter:
+    def __init__(self, skipped_ticks, wrapped_object):
+        self.current_tick = 0
+        self.skipped_ticks = skipped_ticks
+        self.wrapped_object = wrapped_object
+
+    def tick(self):
+        if self.current_tick == self.skipped_ticks:
+            self.wrapped_object.tick()
+            self.current_tick = 0
+        else:
+            self.current_tick += 1
+
+
+import time
+class TickGenerator:
+    def __init__(self, frequency_hz):
+        self.frequency_hz = frequency_hz
+        self.subscribers = []
+
+    def add_subscriber(self, subscriber):
+        self.subscribers.append(subscriber)
+
+    def run_ticks(self):
         while True:
-            time.sleep(0.2)
-            model = self.scene.get_render_model()
-            self.renderer.render(model)
-            if len(self.actions) > 0:
-                self.scene.receive_input(self.actions[0])
-                self.actions = self.actions[1:]
+            for subscriber in self.subscribers:
+                subscriber.tick()
+            time.sleep(1/self.frequency_hz)
+

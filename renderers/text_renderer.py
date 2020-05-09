@@ -4,6 +4,11 @@ from model.cell_occupation import CellOccupation
 
 
 class TextRenderer:
+
+    def setup_with_field(self, state):
+        pass
+
+
     def render(self, model):
         os.system("clear")
         state = model.game_state
@@ -20,4 +25,4 @@ class TextRenderer:
             print(field_row)
 
         print('cursor: ' + str(model.cursor_position))
-        print('last move result: ' + str(model.last_move_result))
+        print('last move result: ' + str(state.last_move_result))

@@ -8,21 +8,21 @@ class UserCursorController:
         self.right_limit = state.size_x
 
     def input_arrow_up(self):
-        new_position = Coordinate(self.cursor_position.x - 1, self.cursor_position.y)
+        new_position = Coordinate(self.cursor_position.x, self.cursor_position.y - 1)
         if self.__validate_cursor_position(new_position):
             self.cursor_position = new_position
 
-    def input_arrow_down(self):
+    def input_arrow_right(self):
         new_position = Coordinate(self.cursor_position.x + 1, self.cursor_position.y)
         if self.__validate_cursor_position(new_position):
             self.cursor_position = new_position
 
     def input_arrow_left(self):
-        new_position = Coordinate(self.cursor_position.x, self.cursor_position.y-1)
+        new_position = Coordinate(self.cursor_position.x - 1, self.cursor_position.y)
         if self.__validate_cursor_position(new_position):
             self.cursor_position = new_position
 
-    def input_arrow_right(self):
+    def input_arrow_down(self):
         new_position = Coordinate(self.cursor_position.x, self.cursor_position.y+1)
         if self.__validate_cursor_position(new_position):
             self.cursor_position = new_position
