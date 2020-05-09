@@ -11,6 +11,7 @@ from renderers.pygame_renderer import PyGameRenderer
 from renderers.text_renderer import TextRenderer
 import time
 import keyboard
+from cv.cv_input_controller import CvInputConroller
 
 
 from utils.PublishSubject import Subject
@@ -62,8 +63,9 @@ class Executor:
 
 
 class KeyboardInputUpdater:
-    def __init__(self, scene):
+    def __init__(self, scene, cv_input):
         self.scene = scene
+        self.cv_input = cv_input
         pygame.init()
 
     def tick(self):
@@ -80,16 +82,22 @@ class KeyboardInputUpdater:
                     scene.receive_input(Input.BOTTOM_ARROW)
                 elif event.key == pygame.K_SPACE:
                     scene.receive_input(Input.ENTER)
+                elif event.key == pygame.K_b:
+                    self.cv_input.calibrate()
 
 
 scene_state_subject = Subject()
 scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
 
+cv_input = CvInputConroller(scene)
+cv_input.start()
+
 scene_state_subject._subject_state = scene.get_render_model()
 renderer = PyGameRenderer()
 renderer.setup_with_field(scene.get_render_model().game_state)
 tick_generator = TickGenerator(60)
-tick_generator.add_subscriber(KeyboardInputUpdater(scene))
+tick_generator.add_subscriber(KeyboardInputUpdater(scene, cv_input))
+tick_generator.add_subscriber(cv_input)
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
 
 # render on scene state change
