@@ -89,13 +89,13 @@ class KeyboardInputUpdater:
 scene_state_subject = Subject()
 scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
 
-cv_input = CvInputConroller(scene)
+cv_input = CvInputConroller(scene, 2)
 cv_input.start()
 
 scene_state_subject._subject_state = scene.get_render_model()
 renderer = PyGameRenderer()
 renderer.setup_with_field(scene.get_render_model().game_state)
-tick_generator = TickGenerator(60)
+tick_generator = TickGenerator(20)
 tick_generator.add_subscriber(KeyboardInputUpdater(scene, cv_input))
 tick_generator.add_subscriber(cv_input)
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))

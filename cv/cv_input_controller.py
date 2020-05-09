@@ -60,12 +60,14 @@ import cv.image_background_remove as image_background_remove
     #     imageBackgroundRemover = image_background_remove.ImageBackgroundRemover()
     #     print('calibrated')
 
-
+import time
 class CvInputConroller:
-    def __init__(self, scene):
+    def __init__(self, scene, input_quantization_seconds):
         self.camera = camera.Camera()
         self.imageBackgroundRemover = None
         self.scene = scene
+        self.input_quantization_seconds = input_quantization_seconds
+        self.last_input_submitted = time.time()
 
     def start(self):
         self.camera.start_recording()
@@ -122,4 +124,7 @@ class CvInputConroller:
             cv2.imshow('output', frame)
 
     def make_input(self, command):
-        self.scene.receive_input(command)
+        current_timestamp = time.time()
+        if current_timestamp - self.last_input_submitted > self.input_quantization_seconds:
+            self.scene.receive_input(command)
+            self.last_input_submitted = current_timestamp
