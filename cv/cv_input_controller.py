@@ -109,14 +109,15 @@ class CvInputConroller:
     def tick(self):
         frame = self.camera.get_current_frame()
         frame = cv_utils.smooth_frame(frame)
-        cv2.rectangle(frame, (int(constants.ROI_X_BEGIN * frame.shape[1]), 0),
-                      (frame.shape[1], int(constants.ROI_Y_END * frame.shape[0])), (255, 0, 0), 2)
+        cv2.rectangle(frame, (int(constants.ROI_X_START * frame.shape[1]), int(frame.shape[0]*constants.ROI_Y_START)),
+                      (int((constants.ROI_X_START+constants.ROI_SIZE) * frame.shape[1]), int((constants.ROI_Y_START*frame.shape[1] + constants.ROI_SIZE * frame.shape[0]))), (255, 0, 0), 2)
         cv_utils.show_frame(frame, "camera")
         if self.imageBackgroundRemover is not None and self.imageBackgroundRemover.calibrated:
             img = self.imageBackgroundRemover.remove_background_from_image(frame)
+
             img = cv_utils.crop_frame(img,
-                                      (0, int(constants.ROI_Y_END * img.shape[0])),
-                                      (int(constants.ROI_X_BEGIN * img.shape[1]), img.shape[1]))
+                                      (int(constants.ROI_X_START * img.shape[1]), int((constants.ROI_X_START + constants.ROI_SIZE) * img.shape[1])),
+                      (int(img.shape[0]*constants.ROI_Y_START), int((constants.ROI_Y_START*img.shape[1] + constants.ROI_SIZE * img.shape[0]))))
             # cv_utils.show_frame(img, "mask")
             gray = cv_utils.convert_frame_to_gray_scale(img)
             blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_VAL)
@@ -133,7 +134,7 @@ class CvInputConroller:
             # hull = external_contour
             hull = geometry_utils.validate_convex_hull(hull, (img.shape[0], img.shape[1]))
             if hull is not None:
-                offset = (int(constants.ROI_X_BEGIN * frame.shape[1]), 0)
+                offset = (int(constants.ROI_X_START * frame.shape[1]), int(constants.ROI_Y_START * frame.shape[0]))
                 polygon_angles = geometry_utils.get_polygon_angles(hull)
                 for i in range(len(polygon_angles)):
                     cv_utils.draw_text(frame, tuple(map(sum, zip(hull[i][0], offset))),
@@ -154,9 +155,8 @@ class CvInputConroller:
                     cv_utils.draw_text(frame, (40, 40), command)
                 else:
                     _, finger_count = self.calculateFingers(external_contour_fingers, offset, frame)
-                    if finger_count >= 3:
+                    if finger_count >= 4:
                         self.make_input(Input.ENTER)
-
 
             cv2.imshow('output', frame)
 
@@ -165,5 +165,4 @@ class CvInputConroller:
         if current_timestamp - self.last_input_submitted > self.input_quantization_seconds:
             self.scene.receive_input(command)
             self.last_input_submitted = current_timestamp
-        self.scene.receive_input(command)
 

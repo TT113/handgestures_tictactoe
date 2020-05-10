@@ -8,7 +8,7 @@ def flip_frame(frame):
 
 
 def crop_frame(frame, x_range, y_range):
-    return frame[x_range[0]: x_range[1], y_range[0]:y_range[1]]
+    return frame[y_range[0]:y_range[1], x_range[0]: x_range[1]]
 
 
 def show_frame(frame, caption):
