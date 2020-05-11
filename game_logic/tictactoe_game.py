@@ -17,6 +17,7 @@ class TicTacToeGame:
 
     def __make_move(self, coordinate):
         current_cell_state = self.controller.get_cell(coordinate)
+
         if current_cell_state != CellOccupation.FREE:
             return MoveResult.CELL_OCCUPIED
 
@@ -30,11 +31,15 @@ class TicTacToeGame:
         self.controller.set_cell(coordinate, new_cell_state)
 
         # check if current move finished game
-        winner = self.finish_strategy.check(self.state)
+        winner = self.finish_strategy.check(self.state.field)
         if winner != Winner.NONE:
             self.game_is_ongoing = False
             self.winner = winner
             return MoveResult.GAME_FINISHED
+
+        if self.controller.is_board_fully_occupied():
+            self.game_is_ongoing = False
+            return  MoveResult.GAME_FINISHED
 
         self.__next_move()
 

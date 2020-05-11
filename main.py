@@ -12,37 +12,10 @@ from renderers.text_renderer import TextRenderer
 import time
 import keyboard
 from cv.cv_input_controller import CvInputConroller
-
-
+from game_logic.ai_player import *
+from ai.minimax_strategy import *
+from game_logic.tic_tac_toe_default_winner_check_strategy import TicTacToeDefaultWinnerCheckStrategy
 from utils.PublishSubject import Subject
-
-
-class InputterX:
-    def __init__(self, scene):
-        self.actions = [Input.ENTER, Input.BOTTOM_ARROW, Input.ENTER, Input.BOTTOM_ARROW, Input.ENTER]
-        self.scene = scene
-        self.current_action = 0
-
-    def update(self, scene):
-        print("receive state update", scene.game_state.turn, scene.cursor_position)
-        if self.current_action < len(self.actions) and scene.game_state.turn == Player.X:
-            current_action = self.actions[self.current_action]
-            self.current_action += 1
-            print("give_input", current_action)
-            self.scene.receive_input(current_action)
-
-
-class InputterO:
-    def __init__(self, scene):
-        self.actions = [Input.RIGHT_ARROW, Input.ENTER, Input.RIGHT_ARROW, Input.ENTER]
-        self.scene = scene
-        self.current_action = 0
-
-    def update(self, scene):
-        if self.current_action < len(self.actions) and scene.game_state.turn == Player.O:
-            current_action = self.actions[self.current_action]
-            self.current_action += 1
-            self.scene.receive_input(current_action)
 
 
 class SceneUpdateWrapper:
@@ -62,7 +35,7 @@ class Executor:
         self.executed_fn()
 
 
-class KeyboardInputUpdater:
+class KeyboardInputReceiver:
     def __init__(self, scene, cv_input):
         self.scene = scene
         self.cv_input = cv_input
@@ -96,18 +69,15 @@ scene_state_subject._subject_state = scene.get_render_model()
 renderer = PyGameRenderer()
 renderer.setup_with_field(scene.get_render_model().game_state)
 tick_generator = TickGenerator(60)
-tick_generator.add_subscriber(KeyboardInputUpdater(scene, cv_input))
-tick_generator.add_subscriber(cv_input)
+
+tick_generator.add_subscriber(KeyboardInputReceiver(scene, cv_input))
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
+tick_generator.add_subscriber(cv_input)
 
-# render on scene state change
-# scene_state_subject.attach(SceneUpdateWrapper(lambda x: renderer.render(x)), True)
-# scene_state_subject.attach(InputterX(scene), True)
-# scene_state_subject.attach(InputterO(scene), True)
 input_x, input_o = scene.get_input_controllers()
-# input_x(Input.ENTER)
-# input_o(Input.ENTER)
 
+scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.X), Player.X, scene), True)
 
 tick_generator.run_ticks()
+
 

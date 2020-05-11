@@ -1,4 +1,5 @@
 from model.cell_occupation import CellOccupation
+from model.coordinate import Coordinate
 from model.player import Player
 
 
@@ -28,3 +29,20 @@ class GameFieldController:
             return False
 
         return True
+
+    def get_board_hash(self):
+        occupations = []
+        for i in range(self.height):
+            for j in range(self.width):
+                cell = self.get_cell(Coordinate(i,j))
+                if cell == CellOccupation.X:
+                    occupations.append('X')
+                if cell == CellOccupation.O:
+                    occupations.append('O')
+                if cell == CellOccupation.FREE:
+                    occupations.append('-')
+        return ''.join(occupations)
+
+    def is_board_fully_occupied(self):
+        hash = self.get_board_hash()
+        return hash.find('-') == -1
