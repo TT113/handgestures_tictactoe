@@ -1,11 +1,11 @@
 import cv.math_utils as math_utils
 
 def invalid_point(point, angle, frame_shape):
-    offset_dist = 60
-    offset_angle = 30
-    if (point[0][0] <= offset_dist or frame_shape[0] - point[0][0] <= offset_dist) and abs(angle-90)<=offset_angle:
+    offset_dist = 40
+    offset_angle = 35
+    if (point[0][0] <= offset_dist or frame_shape[0] - point[0][1] <= offset_dist) and abs(angle-90)<=offset_angle:
         return True
-    elif (point[0][1] <= offset_dist or frame_shape[1] - point[0][1] <= offset_dist) and abs(angle-90)<=offset_angle:
+    elif (point[0][1] <= offset_dist or frame_shape[1] - point[0][0] <= offset_dist) and abs(angle-90)<=offset_angle:
         return True
     else:
         return False
