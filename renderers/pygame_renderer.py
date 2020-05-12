@@ -3,6 +3,7 @@ import os
 import pygame
 
 from model.cell_occupation import CellOccupation
+import cv.constants as constants
 
 
 class PyGameRenderer:
@@ -22,7 +23,8 @@ class PyGameRenderer:
         self.field_cell_width = self.field_side_dimension / self.field_width_cells
         self.field_cell_height = self.field_side_dimension / self.field_height_cells
 
-        self.sc = pygame.display.set_mode((self.width, self.height))
+        self.camera_frame = None
+        self.sc = pygame.display.set_mode((constants.UI_WINDOW_WIDTH, constants.UI_WINDOW_HEIGHT))
 
         # здесь будут рисоваться фигуры
 
@@ -40,6 +42,9 @@ class PyGameRenderer:
 
     def __relative_coordinates(self, rect, coordinates):
         return (rect[0] + coordinates[0], rect[1] + coordinates[1])
+
+    def set_camera_frame(self, raw_camera_frame_rgb):
+        self.camera_frame = pygame.surfarray.make_surface(raw_camera_frame_rgb)
 
     def __draw_field(self):
         field_coordinates = self.__field_coordinates()
@@ -83,7 +88,10 @@ class PyGameRenderer:
         pygame.draw.rect(self.sc, (0,255,0), (cell_coordinate[0] + 20, cell_coordinate[1] + 20, self.field_cell_width - 40, self.field_cell_height -40))
 
     def render(self, state):
-        self.sc.fill((255,255,255))
+        if self.camera_frame is not None:
+            self.sc.blit(self.camera_frame, (0,0))
+        else:
+            self.sc.fill((255,255,255))
         self.__draw_field()
 
 

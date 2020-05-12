@@ -2,18 +2,6 @@ import time
 
 from model.input import Input
 
-
-# class Engine:
-#     def __init__(self, scene, renderer):
-#         self.scene = scene
-#         self.renderer = renderer
-#         self.renderer.setup_with_field(scene.get_render_model().game_state)
-
-    # def tick(self):
-    #     model = self.scene.get_render_model()
-    #     self.renderer.render(model)
-
-
 class TickSplitter:
     def __init__(self, skipped_ticks, wrapped_object):
         self.current_tick = 0

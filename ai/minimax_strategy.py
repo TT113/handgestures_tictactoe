@@ -28,7 +28,7 @@ class MinimaxStrategy:
         return None
 
     def get_best_move(self, game_state):
-        result = self.__minimax(game_state.field, self.ai_player, 0)
+        result = self.__minimax(game_state.field, game_state.turn, 0)
         return result.coordinate
 
     def __player_to_cell_occupation(self, player):

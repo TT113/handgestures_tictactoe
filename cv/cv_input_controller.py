@@ -70,6 +70,7 @@ class CvInputConroller:
         self.scene = scene
         self.input_quantization_seconds = input_quantization_seconds
         self.last_input_submitted = time.time()
+        self.last_processed_frame = None
 
     def start(self):
         self.camera.start_recording()
@@ -106,26 +107,33 @@ class CvInputConroller:
                 return True, cnt
         return False, 0
 
+    def remember_camera_frame(self, new_frame):
+        new_frame = cv2.resize(new_frame, (constants.UI_WINDOW_WIDTH, constants.UI_WINDOW_HEIGHT))
+        recolored_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)
+        recolored_frame = recolored_frame.swapaxes(0,1)
+        self.last_processed_frame = recolored_frame
+
     def tick(self):
         frame = self.camera.get_current_frame()
+        self.remember_camera_frame(frame)
         frame = cv_utils.smooth_frame(frame)
         cv2.rectangle(frame, (int(constants.ROI_X_START * frame.shape[1]), int(frame.shape[0]*constants.ROI_Y_START)),
                       (int((constants.ROI_X_START+constants.ROI_SIZE) * frame.shape[1]), int((constants.ROI_Y_START*frame.shape[0] + constants.ROI_SIZE * frame.shape[1]))), (255, 0, 0), 2)
-        cv_utils.show_frame(frame, "camera")
+        # cv_utils.show_frame(frame, "camera")
         if self.imageBackgroundRemover is not None and self.imageBackgroundRemover.calibrated:
             img = self.imageBackgroundRemover.remove_background_from_image(frame)
 
             img = cv_utils.crop_frame(img,
                                       (int(constants.ROI_X_START * img.shape[1]), int((constants.ROI_X_START + constants.ROI_SIZE) * img.shape[1])),
                       (int(img.shape[0]*constants.ROI_Y_START), int((constants.ROI_Y_START*img.shape[0] + constants.ROI_SIZE * img.shape[1]))))
-            cv_utils.show_frame(img, "mask")
+            # cv_utils.show_frame(img, "mask")
             gray = cv_utils.convert_frame_to_gray_scale(img)
             blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_VAL)
             cv2.imshow('blur', blur)
             low_blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_FINGERS_COUNT)
             _, thresh = cv2.threshold(blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
             _, thresh2 = cv2.threshold(low_blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
-            cv_utils.show_frame(thresh, "filtered")
+            # cv_utils.show_frame(thresh, "filtered")
             contours = cv_utils.extract_contours_from_image(thresh)
             contours_fingers = cv_utils.extract_contours_from_image(thresh2)
             external_contour = geometry_utils.select_external_contour(contours)

@@ -59,20 +59,38 @@ class KeyboardInputReceiver:
                     self.cv_input.calibrate()
 
 
+class CameraFrameUpdater:
+    def __init__(self, cv_engine, renderer):
+        self.cv_engine = cv_engine
+        self.renderer = renderer
+
+    def tick(self):
+        frame = self.cv_engine.last_processed_frame
+        if frame is not None:
+            self.renderer.set_camera_frame(frame)
+
+
 scene_state_subject = Subject()
 scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
+
+renderer = PyGameRenderer()
+
 
 cv_input = CvInputConroller(scene, 2)
 cv_input.start()
 
 scene_state_subject._subject_state = scene.get_render_model()
-renderer = PyGameRenderer()
+
+
+
+
 renderer.setup_with_field(scene.get_render_model().game_state)
 tick_generator = TickGenerator(60)
 
 tick_generator.add_subscriber(KeyboardInputReceiver(scene, cv_input))
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
 tick_generator.add_subscriber(cv_input)
+tick_generator.add_subscriber(CameraFrameUpdater(cv_input, renderer))
 
 input_x, input_o = scene.get_input_controllers()
 
