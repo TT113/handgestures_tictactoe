@@ -56,7 +56,7 @@ class CvInputConroller:
                                       (2 * b * c))  # cosine theorem
                     if angle <= math.pi * 0.5:  # angle less than 90 degree, treat as fingers
                         cnt += 1
-                        cv2.circle(drawing, tuple(map(sum, zip(far, offset))), 8, [211, 84, 0], -1)
+                        # cv2.circle(drawing, tuple(map(sum, zip(far, offset))), 8, [211, 84, 0], -1)
                 return True, cnt
         return False, 0
 
@@ -77,14 +77,14 @@ class CvInputConroller:
             img = cv_utils.crop_frame(img,
                                       (int(constants.ROI_X_START * img.shape[1]), int((constants.ROI_X_START + constants.ROI_SIZE) * img.shape[1])),
                       (int(img.shape[0]*constants.ROI_Y_START), int((constants.ROI_Y_START*img.shape[0] + constants.ROI_SIZE * img.shape[1]))))
-            cv_utils.show_frame(img, "mask")
+            # cv_utils.show_frame(img, "mask")
             gray = cv_utils.convert_frame_to_gray_scale(img)
             blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_VAL)
             low_blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_FINGERS_COUNT)
-            cv2.imshow('blur', low_blur)
+            # cv2.imshow('blur', low_blur)
             _, thresh = cv2.threshold(blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
             _, thresh2 = cv2.threshold(low_blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
-            cv_utils.show_frame(thresh, "filtered")
+            # cv_utils.show_frame(thresh, "filtered")
             # if np.count_nonzero(thresh == 255) >= 0.95 * thresh.shape[0] * thresh.shape[1]:
             #     self.calibrate()
             # else:
@@ -99,18 +99,18 @@ class CvInputConroller:
             if hull is not None:
                 offset = (int(constants.ROI_X_START * frame.shape[1]), int(constants.ROI_Y_START * frame.shape[0]))
                 polygon_angles = geometry_utils.get_polygon_angles(hull)
-                for i in range(len(polygon_angles)):
-                    cv_utils.draw_text(frame, tuple(map(sum, zip(hull[i][0], offset))),
-                                       str(i) + ': ' + str(polygon_angles[i]))
+                # for i in range(len(polygon_angles)):
+                #     cv_utils.draw_text(frame, tuple(map(sum, zip(hull[i][0], offset))),
+                #                        str(i) + ': ' + str(polygon_angles[i]))
                 center1 = cv_utils.get_polygon_center(external_contour)
                 center2 = cv_utils.get_polygon_center(hull)
-                cv_utils.draw_point(frame, tuple(map(sum, zip(center1, offset))))
-                cv_utils.draw_point(frame, tuple(map(sum, zip(center2, offset))))
-                cv2.drawContours(frame, [external_contour_fingers], 0, (0, 255, 0), 2, offset=offset)
-                cv2.drawContours(frame, [hull], 0, (0, 0, 255), 3, offset=offset)
+                # cv_utils.draw_point(frame, tuple(map(sum, zip(center1, offset))))
+                # cv_utils.draw_point(frame, tuple(map(sum, zip(center2, offset))))
+                # cv2.drawContours(frame, [external_contour_fingers], 0, (0, 255, 0), 2, offset=offset)
+                # cv2.drawContours(frame, [hull], 0, (0, 0, 255), 3, offset=offset)
                 input = input_generator.generate_input(center1, hull, polygon_angles, img.shape)
                 if input is not None:
-                    cv_utils.draw_point(frame, tuple(map(sum, zip(input, offset))))
+                    # cv_utils.draw_point(frame, tuple(map(sum, zip(input, offset))))
                     game_command = geometry_utils.get_vector_direction(input - np.array(center1))
                     command = str(game_command)
                     if game_command is not None:

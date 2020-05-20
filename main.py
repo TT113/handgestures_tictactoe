@@ -77,7 +77,7 @@ scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
 renderer = PyGameRenderer(ResourceLoader.with_default_params())
 
 
-cv_input = CvInputConroller(scene, 2)
+cv_input = CvInputConroller(scene, 1)
 cv_input.start()
 
 scene_state_subject._subject_state = scene.get_render_model()

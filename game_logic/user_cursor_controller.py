@@ -3,7 +3,7 @@ from model.coordinate import Coordinate
 
 class UserCursorController:
     def __init__(self, state):
-        self.cursor_position = Coordinate(0, 0)
+        self.cursor_position = Coordinate(1, 1)
         self.bottom_limit = state.size_y
         self.right_limit = state.size_x
 
