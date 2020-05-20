@@ -27,7 +27,19 @@ class TickGenerator:
 
     def run_ticks(self):
         while True:
+            timestamp = time.time()
+            timestamp_should_end_tick = timestamp + 1 / self.frequency_hz
+
+            # print('begin loop')
             for subscriber in self.subscribers:
+                # timestamp_begin_subscriber = time.time()
                 subscriber.tick()
-            time.sleep(1/self.frequency_hz)
+                # print(type(subscriber), time.time() - timestamp_begin_subscriber)
+            finished_tick_timestamp = time.time()
+            #
+            # print('end loop', finished_tick_timestamp - timestamp)
+
+            if finished_tick_timestamp < timestamp_should_end_tick:
+                remaining_time = timestamp_should_end_tick - finished_tick_timestamp
+                time.sleep(remaining_time)
 

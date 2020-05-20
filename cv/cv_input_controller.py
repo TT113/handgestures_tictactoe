@@ -38,8 +38,6 @@ class CvInputConroller:
         hull = cv2.convexHull(res, returnPoints=False)
         if len(hull) > 3:
             defects = cv2.convexityDefects(res, hull)
-            if defects is not None:
-                print(defects.shape[0])
             if type(defects) != type(None):  # avoid crashing.   (BUG not found)
                 cnt = 0
                 for i in range(defects.shape[0]):  # calculate the angle
@@ -68,6 +66,7 @@ class CvInputConroller:
 
     def tick(self):
         frame = self.camera.get_current_frame()
+        frame = cv2.resize(frame, (800, 450))
         # frame = cv_utils.smooth_frame(frame)
         cv2.rectangle(frame, (int(constants.ROI_X_START * frame.shape[1]), int(frame.shape[0]*constants.ROI_Y_START)),
                       (int((constants.ROI_X_START+constants.ROI_SIZE) * frame.shape[1]), int((constants.ROI_Y_START*frame.shape[0] + constants.ROI_SIZE * frame.shape[1]))), (255, 0, 0), 2)
@@ -80,11 +79,12 @@ class CvInputConroller:
             # cv_utils.show_frame(img, "mask")
             gray = cv_utils.convert_frame_to_gray_scale(img)
             blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_VAL)
-            low_blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_FINGERS_COUNT)
-            # cv2.imshow('blur', low_blur)
+            # low_blur = cv_utils.perform_gaussian_blur(gray, constants.GAUSSIAN_BLUR_FINGERS_COUNT)
+            # cv2.imshow('blur', blur)
             _, thresh = cv2.threshold(blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
-            _, thresh2 = cv2.threshold(low_blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
+            _, thresh2 = cv2.threshold(blur, constants.BINARY_THRESHOLD, 255, cv2.THRESH_BINARY)
             # cv_utils.show_frame(thresh, "filtered")
+
             # if np.count_nonzero(thresh == 255) >= 0.95 * thresh.shape[0] * thresh.shape[1]:
             #     self.calibrate()
             # else:
@@ -116,7 +116,6 @@ class CvInputConroller:
                     if game_command is not None:
                         if self.make_input(game_command):
                             cv_utils.draw_text(frame, (40, 40), command)
-
                     else:
                         print('set none command')
                         self.previous_command = None
@@ -127,19 +126,27 @@ class CvInputConroller:
 
             # cv2.imshow('output', frame)
             self.previous_frame = blur
+            begin_recognition_frame_x = int(constants.ROI_X_START * frame.shape[1])
+            begin_recognition_frame_y = int(frame.shape[0]*constants.ROI_Y_START)
+            thresh = cv2.bitwise_not(thresh)
+            colored_tresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+            region = frame[begin_recognition_frame_y:begin_recognition_frame_y+thresh.shape[0], begin_recognition_frame_x:begin_recognition_frame_x+thresh.shape[1]]
+            region = cv2.bitwise_and(region, colored_tresh)
+            frame[begin_recognition_frame_y:begin_recognition_frame_y+thresh.shape[0], begin_recognition_frame_x:begin_recognition_frame_x+thresh.shape[1]] = region
             self.remember_camera_frame(frame)
 
 
     def make_input(self, command):
         current_timestamp = time.time()
-        print('received', command)
         if current_timestamp - self.last_input_submitted < self.input_quantization_seconds:
             return False
+
+        self.last_input_submitted = current_timestamp
+        print('input tick')
 
         if self.previous_command == command:
             print('inputting', command)
             self.scene.receive_input(command)
-            self.last_input_submitted = current_timestamp
             return True
 
         self.previous_command = command

@@ -86,7 +86,7 @@ scene_state_subject._subject_state = scene.get_render_model()
 
 
 renderer.setup_with_field(scene.get_render_model().game_state)
-tick_generator = TickGenerator(60)
+tick_generator = TickGenerator(120)
 
 tick_generator.add_subscriber(KeyboardInputReceiver(scene, cv_input))
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
