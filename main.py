@@ -16,6 +16,7 @@ from game_logic.ai_player import *
 from ai.minimax_strategy import *
 from game_logic.tic_tac_toe_default_winner_check_strategy import TicTacToeDefaultWinnerCheckStrategy
 from utils.PublishSubject import Subject
+from renderers.resource_loader import ResourceLoader
 
 
 class SceneUpdateWrapper:
@@ -73,7 +74,7 @@ class CameraFrameUpdater:
 scene_state_subject = Subject()
 scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
 
-renderer = PyGameRenderer()
+renderer = PyGameRenderer(ResourceLoader.with_default_params())
 
 
 cv_input = CvInputConroller(scene, 2)
@@ -94,8 +95,9 @@ tick_generator.add_subscriber(CameraFrameUpdater(cv_input, renderer))
 
 input_x, input_o = scene.get_input_controllers()
 
-scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.X), Player.X, scene), True)
+scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.O), Player.O, scene), True)
 
+# cv_input.calibrate()
 tick_generator.run_ticks()
 
 

@@ -6,7 +6,7 @@ import numpy as np
 class ImageBackgroundRemover:
 
     def __init__(self):
-        self.model = cv2.createBackgroundSubtractorMOG2(1, constants.BG_SUBTRACTION_THRESHOLD)
+        self.model = cv2.createBackgroundSubtractorMOG2(100, constants.BG_SUBTRACTION_THRESHOLD)
         self.calibrated = True
 
     def remove_background_from_image(self, image):

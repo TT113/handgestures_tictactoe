@@ -47,6 +47,9 @@ class TicTacToeGame:
 
     def make_move(self, coordinate):
         move_result = self.__make_move(coordinate)
+        self.state.last_move_result = move_result
+        self.state.last_move_coordinate = coordinate
+
         self.state_callback(self.state)
         return move_result
 

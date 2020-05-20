@@ -21,6 +21,7 @@ def relax_convex_hull(hull, img_shape):
 
     if len(hull_relaxed) > 2 and np.linalg.norm(hull_relaxed[0]-hull_relaxed[-1]) < constants.CONVEX_HULL_RELAX_THRESHOLD:
         hull_relaxed = np.delete(hull_relaxed, -1, 0)
+
     return hull_relaxed
 
 
@@ -33,11 +34,14 @@ def select_external_contour(contours):
 
 
 def validate_convex_hull(hull, img_shape):
+    roi_area = img_shape[0] * img_shape[1]
     if hull is None:
         return None
     else:
         hull = relax_convex_hull(hull, img_shape)
-        return hull if hull.shape[0] > 4 else None
+        hull_area = cv_utils.get_contour_area(hull)
+        return hull if (hull.shape[0] > 3 and
+                        0.15 * roi_area < hull_area < roi_area * 0.95) else None
 
 
 def get_polygon_angles(polygon):
@@ -64,7 +68,7 @@ from enum import Enum
 
 def get_vector_direction(vector):
     angle = get_angle_between_vector_and_x_axis(vector)
-    if abs(angle) <= constants.DIRECTION_ANGLES_OFFSET:
+    if angle <= constants.DIRECTION_ANGLES_OFFSET or 2*math_utils.PI_D - angle <= constants.DIRECTION_ANGLES_OFFSET:
         return Input.LEFT_ARROW
     elif abs(math_utils.PI_D / 2 - angle) <= constants.DIRECTION_ANGLES_OFFSET:
         return Input.TOP_ARROW

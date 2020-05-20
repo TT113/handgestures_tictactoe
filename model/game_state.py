@@ -9,6 +9,8 @@ class GameState:
         self.size_y = len(field)
         self.turn = turn
         self.last_move_result = last_move_result
+        self.last_move_cell = None
+        self.last_move_coordinate = None
 
     @staticmethod
     def create_field(size_x, size_y):
