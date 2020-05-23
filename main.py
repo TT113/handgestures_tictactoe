@@ -95,9 +95,9 @@ tick_generator.add_subscriber(CameraFrameUpdater(cv_input, renderer))
 
 input_x, input_o = scene.get_input_controllers()
 
-scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.O), Player.O, scene), True)
+scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.X), Player.O, scene), True)
 
-# cv_input.calibrate()
+cv_input.calibrate()
 tick_generator.run_ticks()
 
 

@@ -9,6 +9,12 @@ default_layout_params = {
     'cursor_invalid_asset_name': 'cursor_invalid.png',
     'cursor_valid_asset_name': 'cursor.png',
     'frame_asset_name': 'frame.png',
+
+    'palm_hint_asset_name': 'palm_hint.png',
+    'gaming_hint_asset_name': 'gaming_hint.png',
+    'crosses_wins_asset_name': 'crosses_wins.png',
+    'noughts_wins_asset_name': 'nougts_wins.png',
+    'start_hint_asset_name': 'start_hint.png',
 }
 
 
@@ -32,12 +38,17 @@ class ResourceLoader:
         name_for_cache = asset_name
         if cached_name is not None:
             name_for_cache = cached_name
-        if asset_name in self.cached_resources:
-            return self.cached_resources[asset_name]
+        if name_for_cache in self.cached_resources:
+            return self.cached_resources[name_for_cache]
 
         asset = pygame.image.load(self.__get_path_for_asset(asset_name))
-        asset = pygame.transform.scale(asset, (int(size[0]), int(size[1])))
-        self.cached_resources[asset_name] = asset
+        if size is not None:
+            asset = pygame.transform.scale(asset, (int(size[0]), int(size[1])))
+        self.cached_resources[name_for_cache] = asset
+        return asset
+
+    def get_generic_asset(self, name):
+        asset = self.__get_scaled_asset(name, None)
         return asset
 
 
@@ -63,4 +74,7 @@ class ResourceLoader:
     def get_frame_asset(self, length):
         name = self.layout_params['frame_asset_name']
         return self.__get_scaled_asset(name, (length,length), name + str(length))
+
+    def get_start_hint_asset(self):
+        return self.__get_scaled_asset(self.layout_params['start_hint_asset_name'], None)
 

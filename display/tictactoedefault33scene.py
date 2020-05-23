@@ -6,6 +6,8 @@ from model.input import Input
 from model.move_result import MoveResult
 from model.player import Player
 from model.scene_render_model import SceneModel
+from model.coordinate import Coordinate
+import time
 
 class TicTacToeDefault33Scene:
 
@@ -14,10 +16,12 @@ class TicTacToeDefault33Scene:
         self.scene_changed_callback = game_changed_callback
         self.game = TicTacToeGame(game_state, TicTacToeDefaultWinnerCheckStrategy(), self.game_changed_callback)
         self.user_cursor_controller = UserCursorController(game_state)
+        self.game_begin_timestamp = time.time()
 
     def new_init(self):
         game_state = GameState.get_default_with_field(3, 3)
         self.game = TicTacToeGame(game_state, TicTacToeDefaultWinnerCheckStrategy(), self.game_changed_callback)
+        self.user_cursor_controller.cursor_position = Coordinate(1, 1)
 
     def receive_input(self, input):
         if input == Input.BOTTOM_ARROW:
@@ -39,10 +43,11 @@ class TicTacToeDefault33Scene:
             self.game_changed_callback(self.game.state)
 
     def game_changed_callback(self, game_state):
-        self.scene_changed_callback(SceneModel(game_state, self.user_cursor_controller.cursor_position))
+        self.scene_changed_callback(self.get_render_model())
 
     def get_render_model(self):
-        return SceneModel(self.game.state, self.user_cursor_controller.cursor_position)
+        should_render_start_tip = time.time() - self.game_begin_timestamp < 10
+        return SceneModel(self.game.state, SceneState(self.user_cursor_controller.cursor_position, should_render_start_tip, self.game_begin_timestamp, self.game.winner))
 
     def __create_filtered_controller(self, player):
         def controller(input):
@@ -55,3 +60,10 @@ class TicTacToeDefault33Scene:
 
     def instant_move(self, coordinate):
         self.game.make_move(coordinate)
+
+class SceneState:
+    def __init__(self, cursor_position, should_render_start_tip, game_begin_timestamp, winner):
+        self.cursor_position = cursor_position
+        self.should_render_start_tip = should_render_start_tip
+        self.game_begin_timestamp = game_begin_timestamp
+        self.winner = winner
