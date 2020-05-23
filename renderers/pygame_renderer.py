@@ -19,7 +19,7 @@ class PyGameRenderer:
         self.field_width_cells = 3
         self.field_height_cells = 3
 
-        self.field_side_dimension = 300
+        self.field_side_dimension = 450
 
         self.field_cell_width = self.field_side_dimension / self.field_width_cells
         self.field_cell_height = self.field_side_dimension / self.field_height_cells
@@ -37,7 +37,7 @@ class PyGameRenderer:
         self.field_cell_height = self.field_side_dimension / state.size_y
 
     def __field_coordinates(self):
-        return (600, 40, self.field_side_dimension, self.field_side_dimension)
+        return (600, constants.UI_WINDOW_HEIGHT/2 - self.field_side_dimension/2, self.field_side_dimension, self.field_side_dimension)
 
     def __relative_coordinates(self, rect, coordinates):
         return (rect[0] + coordinates[0], rect[1] + coordinates[1])
@@ -47,8 +47,13 @@ class PyGameRenderer:
 
     def __draw_field(self):
         field_coordinates = self.__field_coordinates()
-        field_resource = self.resource_loader.get_field_asset()
-        self.sc.blit(field_resource, (field_coordinates[0],field_coordinates[1]))
+        field_resource = self.resource_loader.get_field_asset(self.field_side_dimension)
+        aka_vertical_padding = 60
+        field_frame = self.resource_loader.get_frame_asset(self.field_side_dimension + aka_vertical_padding)
+
+        frame_coordinates = self.__relative_coordinates(field_coordinates, (-aka_vertical_padding/2,-aka_vertical_padding/2))
+        self.sc.blit(field_resource, (field_coordinates[0], field_coordinates[1]))
+        self.sc.blit(field_frame, (frame_coordinates[0], frame_coordinates[1]))
 
     def __get_cell_rect_coordinates(self, coordinate):
         field_coordinates = self.__field_coordinates()
@@ -56,23 +61,22 @@ class PyGameRenderer:
 
     def __draw_cross(self, cell_coordinate):
         coordinates = self.__get_cell_rect_coordinates(cell_coordinate)
-        field_resource = self.resource_loader.get_cross_asset()
+        field_resource = self.resource_loader.get_cross_asset(self.field_side_dimension/5)
         self.sc.blit(field_resource, coordinates)
 
     def __draw_oval(self, cell_coordinate):
         coordinates = self.__get_cell_rect_coordinates(cell_coordinate)
-        field_resource = self.resource_loader.get_nought_asset()
+        field_resource = self.resource_loader.get_nought_asset(self.field_side_dimension/5)
         self.sc.blit(field_resource, coordinates)
 
 
     def __draw_cursor(self, coordinate, valid):
         cell_coordinate = self.__get_cell_rect_coordinates(coordinate)
-        field_resource = self.resource_loader.get_cursor_asset(valid)
+        field_resource = self.resource_loader.get_cursor_asset(valid, self.field_side_dimension/2)
         w, h = field_resource.get_size()
         center_offset = (w - self.field_cell_width) / 2
-        length_penalty = coordinate[0] * 30
-        self.sc.blit(field_resource, self.__relative_coordinates(cell_coordinate, (-center_offset - length_penalty,-center_offset)))
-        # self.sc.blit(field_resource, cell_coordinate)
+        length_penalty = coordinate[0] * self.field_side_dimension/10
+        self.sc.blit(field_resource, self.__relative_coordinates(cell_coordinate, (-center_offset - length_penalty, -center_offset)))
 
     def render(self, state):
         if self.camera_frame is not None:
