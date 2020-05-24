@@ -1,16 +1,7 @@
-import threading
-
 import pygame
 
 from display.engine import TickGenerator, TickSplitter
-from display.system_time_frame_update_strategy import SystemTimeFrameUpdateStrategy
-from display.tictactoedefault33scene import TicTacToeDefault33Scene
-from model.input import Input
-from model.player import Player
 from renderers.pygame_renderer import PyGameRenderer
-from renderers.text_renderer import TextRenderer
-import time
-import keyboard
 from cv.cv_input_controller import CvInputConroller
 from game_logic.ai_player import *
 from ai.minimax_strategy import *
@@ -82,8 +73,6 @@ scene.set_cv_controller(cv_input)
 cv_input.start()
 
 scene_state_subject._subject_state = scene.get_render_model()
-
-
 
 
 renderer.setup_with_field(scene.get_render_model().game_state)

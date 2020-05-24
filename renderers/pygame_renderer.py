@@ -27,8 +27,8 @@ class PyGameRenderer:
         self.field_cell_height = self.field_side_dimension / self.field_height_cells
 
         self.rendered_numbers = {}
-        myfont = pygame.font.Font(pygame.font.get_default_font(), 32)
-        for i in range(0,20):
+        myfont = resource_loader.get_font()
+        for i in range(0,10):
             textsurface = myfont.render(str(i), 0, (0, 0, 0))
             self.rendered_numbers[str(i)] = textsurface
 

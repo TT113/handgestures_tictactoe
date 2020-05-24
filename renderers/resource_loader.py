@@ -1,6 +1,8 @@
-import cv.constants as constants
+import sys
+
 import os
 import pygame
+from os import chdir
 
 default_layout_params = {
     'board_asset_name': 'field.png',
@@ -29,10 +31,22 @@ class ResourceLoader:
         self.cached_resources = {}
 
     def __get_path_for_asset(self, name):
+        # support for pyinstaller
+        if hasattr(sys, '_MEIPASS'):
+            chdir(sys._MEIPASS)
+        elif '_MEIPASS2' in os.environ:
+            chdir(os.environ['_MEIPASS2'])
+        else:
+            print('else default')
+
         current_path = os.getcwd()  # Where your .py file is located
         resource_path = os.path.join(current_path, 'resources')  # The resource folder path
         image_path = os.path.join(resource_path, name)
         return image_path
+
+    def get_font(self):
+        path = self.__get_path_for_asset('lucidagrande.ttf')
+        return pygame.font.Font(path, 32)
 
     def __get_scaled_asset(self, asset_name, size, cached_name=None):
         name_for_cache = asset_name
