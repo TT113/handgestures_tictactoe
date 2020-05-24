@@ -39,6 +39,7 @@ class TicTacToeGame:
 
         if self.controller.is_board_fully_occupied():
             self.game_is_ongoing = False
+            self.winner = Winner.NONE
             return  MoveResult.GAME_FINISHED
 
         self.__next_move()

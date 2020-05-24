@@ -3,14 +3,18 @@ import os
 import pygame
 
 default_layout_params = {
-    'board_length_px': 300,
-    'nought_cross_size_px' : 60,
     'board_asset_name': 'field.png',
     'nought_asset_name': 'nought.png',
     'cross_asset_name': 'cross.png',
     'cursor_invalid_asset_name': 'cursor_invalid.png',
     'cursor_valid_asset_name': 'cursor.png',
-    'cursor_size_px': 150
+    'frame_asset_name': 'frame.png',
+
+    'palm_hint_asset_name': 'palm_hint.png',
+    'gaming_hint_asset_name': 'gaming_hint.png',
+    'crosses_wins_asset_name': 'crosses_wins.png',
+    'noughts_wins_asset_name': 'nougts_wins.png',
+    'start_hint_asset_name': 'start_hint.png',
 }
 
 
@@ -30,36 +34,47 @@ class ResourceLoader:
         image_path = os.path.join(resource_path, name)
         return image_path
 
-    def __get_scaled_asset(self, asset_name, size):
-        if asset_name in self.cached_resources:
-            return self.cached_resources[asset_name]
+    def __get_scaled_asset(self, asset_name, size, cached_name=None):
+        name_for_cache = asset_name
+        if cached_name is not None:
+            name_for_cache = cached_name
+        if name_for_cache in self.cached_resources:
+            return self.cached_resources[name_for_cache]
 
         asset = pygame.image.load(self.__get_path_for_asset(asset_name))
-        asset = pygame.transform.scale(asset, size)
-        self.cached_resources[asset_name] = asset
+        if size is not None:
+            asset = pygame.transform.scale(asset, (int(size[0]), int(size[1])))
+        self.cached_resources[name_for_cache] = asset
+        return asset
+
+    def get_generic_asset(self, name):
+        asset = self.__get_scaled_asset(name, None)
         return asset
 
 
-    def get_field_asset(self):
+    def get_field_asset(self, length):
         asset_name = self.layout_params['board_asset_name']
-        board_length = self.layout_params['board_length_px']
-        return self.__get_scaled_asset(asset_name, (board_length, board_length))
+        return self.__get_scaled_asset(asset_name, (length, length), asset_name + str(length))
 
-    def get_nought_asset(self):
+    def get_nought_asset(self, length):
         asset_name = self.layout_params['nought_asset_name']
-        length = self.layout_params['nought_cross_size_px']
-        return self.__get_scaled_asset(asset_name, (length,length))
+        return self.__get_scaled_asset(asset_name, (length,length), asset_name + str(length))
 
-    def get_cross_asset(self):
+    def get_cross_asset(self, length):
         asset_name = self.layout_params['cross_asset_name']
-        length = self.layout_params['nought_cross_size_px']
-        return self.__get_scaled_asset(asset_name, (length,length))
+        return self.__get_scaled_asset(asset_name, (length,length), asset_name + str(length))
 
-    def get_cursor_asset(self, valid_move):
+    def get_cursor_asset(self, valid_move, length):
         if valid_move:
             asset_name = self.layout_params['cursor_valid_asset_name']
         else:
             asset_name = self.layout_params['cursor_invalid_asset_name']
-        length = self.layout_params['cursor_size_px']
-        return self.__get_scaled_asset(asset_name, (length, length))
+        return self.__get_scaled_asset(asset_name, (length, length), asset_name + str(length))
+
+    def get_frame_asset(self, length):
+        name = self.layout_params['frame_asset_name']
+        return self.__get_scaled_asset(name, (length,length), name + str(length))
+
+    def get_start_hint_asset(self):
+        return self.__get_scaled_asset(self.layout_params['start_hint_asset_name'], None)
 

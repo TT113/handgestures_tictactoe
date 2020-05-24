@@ -68,8 +68,8 @@ class CvInputConroller:
         frame = self.camera.get_current_frame()
         frame = cv2.resize(frame, (800, 450))
         # frame = cv_utils.smooth_frame(frame)
-        cv2.rectangle(frame, (int(constants.ROI_X_START * frame.shape[1]), int(frame.shape[0]*constants.ROI_Y_START)),
-                      (int((constants.ROI_X_START+constants.ROI_SIZE) * frame.shape[1]), int((constants.ROI_Y_START*frame.shape[0] + constants.ROI_SIZE * frame.shape[1]))), (255, 0, 0), 2)
+        # cv2.rectangle(frame, (int(constants.ROI_X_START * frame.shape[1]), int(frame.shape[0]*constants.ROI_Y_START)),
+        #               (int((constants.ROI_X_START+constants.ROI_SIZE) * frame.shape[1]), int((constants.ROI_Y_START*frame.shape[0] + constants.ROI_SIZE * frame.shape[1]))), (255, 0, 0), 2)
         # cv_utils.show_frame(frame, "camera")
         if self.imageBackgroundRemover is not None and self.imageBackgroundRemover.calibrated:
             img = self.imageBackgroundRemover.remove_background_from_image(frame)
