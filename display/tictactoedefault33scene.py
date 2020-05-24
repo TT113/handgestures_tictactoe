@@ -49,8 +49,8 @@ class TicTacToeDefault33Scene:
 
         self.before_get_render_model()
 
-        instruction_length = 10
-        calibration_length = 10
+        instruction_length = 5
+        calibration_length = 5
         should_render_start_tip = time.time() - self.game_begin_timestamp < instruction_length
         should_render_calibration_tip = instruction_length < time.time() - self.game_begin_timestamp < instruction_length + calibration_length
         return SceneModel(self.game.state, SceneState(self.user_cursor_controller.cursor_position, should_render_start_tip, should_render_calibration_tip, self.game_begin_timestamp, self.game.winner))

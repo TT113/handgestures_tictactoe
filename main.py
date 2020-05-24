@@ -65,10 +65,11 @@ class CameraFrameUpdater:
 scene_state_subject = Subject()
 scene = TicTacToe33SceneWithController(scene_state_subject.update_subject)
 
-renderer = PyGameRenderer(ResourceLoader.with_default_params())
+loader = ResourceLoader.with_default_params()
+renderer = PyGameRenderer(loader)
 
 
-cv_input = CvInputConroller(scene, 1)
+cv_input = CvInputConroller(scene, 1, loader)
 scene.set_cv_controller(cv_input)
 cv_input.start()
 

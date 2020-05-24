@@ -11,7 +11,7 @@ from model.input import *
 
 import time
 class CvInputConroller:
-    def __init__(self, scene, input_quantization_seconds):
+    def __init__(self, scene, input_quantization_seconds, resource_loaer):
         self.camera = camera.Camera()
         self.imageBackgroundRemover = None
         self.scene = scene
@@ -21,6 +21,9 @@ class CvInputConroller:
         self.previous_command = None
         self.previous_frame = None
         self.background = None
+
+        self.hatched_image = cv2.imread(resource_loaer.get_path_for_asset('hatch_texture.png'))
+        self.hatched_image = cv2.resize(self.hatched_image, (220, 220))
 
     def start(self):
         self.camera.start_recording()
@@ -124,14 +127,16 @@ class CvInputConroller:
                     if finger_count >= 4:
                         self.make_input(Input.ENTER)
 
-            # cv2.imshow('output', frame)
             self.previous_frame = blur
             begin_recognition_frame_x = int(constants.ROI_X_START * frame.shape[1])
             begin_recognition_frame_y = int(frame.shape[0]*constants.ROI_Y_START)
-            thresh = cv2.bitwise_not(thresh)
             colored_tresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
             region = frame[begin_recognition_frame_y:begin_recognition_frame_y+thresh.shape[0], begin_recognition_frame_x:begin_recognition_frame_x+thresh.shape[1]]
-            region = cv2.bitwise_and(region, colored_tresh)
+            g = cv2.bitwise_and(self.hatched_image, colored_tresh)
+            g = cv2.multiply(g,g)
+            region = cv2.subtract(region, g)
+
+            # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2RGBA)
             frame[begin_recognition_frame_y:begin_recognition_frame_y+thresh.shape[0], begin_recognition_frame_x:begin_recognition_frame_x+thresh.shape[1]] = region
         self.remember_camera_frame(frame)
 

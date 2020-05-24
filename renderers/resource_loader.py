@@ -30,6 +30,20 @@ class ResourceLoader:
         self.layout_params = layout_params
         self.cached_resources = {}
 
+    def get_path_for_asset(self, name):
+        # support for pyinstaller
+        if hasattr(sys, '_MEIPASS'):
+            chdir(sys._MEIPASS)
+        elif '_MEIPASS2' in os.environ:
+            chdir(os.environ['_MEIPASS2'])
+        else:
+            print('else default')
+
+        current_path = os.getcwd()  # Where your .py file is located
+        resource_path = os.path.join(current_path, 'resources')  # The resource folder path
+        image_path = os.path.join(resource_path, name)
+        return image_path
+
     def __get_path_for_asset(self, name):
         # support for pyinstaller
         if hasattr(sys, '_MEIPASS'):
