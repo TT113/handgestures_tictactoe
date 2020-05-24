@@ -133,7 +133,7 @@ class CvInputConroller:
             region = frame[begin_recognition_frame_y:begin_recognition_frame_y+thresh.shape[0], begin_recognition_frame_x:begin_recognition_frame_x+thresh.shape[1]]
             region = cv2.bitwise_and(region, colored_tresh)
             frame[begin_recognition_frame_y:begin_recognition_frame_y+thresh.shape[0], begin_recognition_frame_x:begin_recognition_frame_x+thresh.shape[1]] = region
-            self.remember_camera_frame(frame)
+        self.remember_camera_frame(frame)
 
 
     def make_input(self, command):

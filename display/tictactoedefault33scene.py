@@ -46,8 +46,14 @@ class TicTacToeDefault33Scene:
         self.scene_changed_callback(self.get_render_model())
 
     def get_render_model(self):
-        should_render_start_tip = time.time() - self.game_begin_timestamp < 10
-        return SceneModel(self.game.state, SceneState(self.user_cursor_controller.cursor_position, should_render_start_tip, self.game_begin_timestamp, self.game.winner))
+
+        self.before_get_render_model()
+
+        instruction_length = 10
+        calibration_length = 10
+        should_render_start_tip = time.time() - self.game_begin_timestamp < instruction_length
+        should_render_calibration_tip = instruction_length < time.time() - self.game_begin_timestamp < instruction_length + calibration_length
+        return SceneModel(self.game.state, SceneState(self.user_cursor_controller.cursor_position, should_render_start_tip, should_render_calibration_tip, self.game_begin_timestamp, self.game.winner))
 
     def __create_filtered_controller(self, player):
         def controller(input):
@@ -61,9 +67,13 @@ class TicTacToeDefault33Scene:
     def instant_move(self, coordinate):
         self.game.make_move(coordinate)
 
+    def before_get_render_model(self):
+        pass
+
 class SceneState:
-    def __init__(self, cursor_position, should_render_start_tip, game_begin_timestamp, winner):
+    def __init__(self, cursor_position, should_render_start_tip, should_render_calibration_tip, game_begin_timestamp, winner):
         self.cursor_position = cursor_position
         self.should_render_start_tip = should_render_start_tip
         self.game_begin_timestamp = game_begin_timestamp
         self.winner = winner
+        self.should_render_calibration_tip = should_render_calibration_tip

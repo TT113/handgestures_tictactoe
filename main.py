@@ -14,9 +14,9 @@ import keyboard
 from cv.cv_input_controller import CvInputConroller
 from game_logic.ai_player import *
 from ai.minimax_strategy import *
-from game_logic.tic_tac_toe_default_winner_check_strategy import TicTacToeDefaultWinnerCheckStrategy
 from utils.PublishSubject import Subject
 from renderers.resource_loader import ResourceLoader
+from display.tictactoe33scenewithcalibration import *
 
 
 class SceneUpdateWrapper:
@@ -72,12 +72,13 @@ class CameraFrameUpdater:
 
 
 scene_state_subject = Subject()
-scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
+scene = TicTacToe33SceneWithController(scene_state_subject.update_subject)
 
 renderer = PyGameRenderer(ResourceLoader.with_default_params())
 
 
 cv_input = CvInputConroller(scene, 1)
+scene.set_cv_controller(cv_input)
 cv_input.start()
 
 scene_state_subject._subject_state = scene.get_render_model()
@@ -97,7 +98,7 @@ input_x, input_o = scene.get_input_controllers()
 
 scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.X), Player.O, scene), True)
 
-cv_input.calibrate()
+# cv_input.calibrate()
 tick_generator.run_ticks()
 
 

@@ -28,7 +28,7 @@ class PyGameRenderer:
 
         self.rendered_numbers = {}
         myfont = pygame.font.Font(pygame.font.get_default_font(), 32)
-        for i in range(0,10):
+        for i in range(0,20):
             textsurface = myfont.render(str(i), 0, (0, 0, 0))
             self.rendered_numbers[str(i)] = textsurface
 
@@ -123,6 +123,10 @@ class PyGameRenderer:
                 if state.game_state.field[i][j] == CellOccupation.O:
                     self.__draw_oval((j,i))
 
+    def __render_recognition_frame_hint(self):
+        asset = self.resource_loader.get_generic_asset('recognition_frame_hint.png')
+        self.sc.blit(asset, (120, 60))
+
     def __draw_bottom_hint(self, state):
         if state.scene_state.winner is not None:
             if state.scene_state.winner == Winner.X:
@@ -133,7 +137,17 @@ class PyGameRenderer:
                 asset = self.resource_loader.get_generic_asset('draw.png')
             self.sc.blit(asset,  (100, 570))
         else:
-            self.__draw_gaming_hint()
+            if state.scene_state.should_render_calibration_tip:
+                asset = self.resource_loader.get_generic_asset('calibration_hint.png')
+                self.sc.blit(asset, (100, 570))
+                time_since_game_begin = time.time() - state.scene_state.game_begin_timestamp
+                seconds = str(20 - int(time_since_game_begin))
+                if seconds in self.rendered_numbers:
+                    second_surface = self.rendered_numbers[seconds]
+                    self.sc.blit(second_surface, (770, 645))
+            else:
+                self.__draw_gaming_hint()
+
 
     def render(self, state):
         if self.camera_frame is not None:
@@ -143,6 +157,12 @@ class PyGameRenderer:
 
         if state.scene_state.should_render_start_tip:
             self.__draw_start_game_hint(time.time() - state.scene_state.game_begin_timestamp)
+        elif state.scene_state.should_render_calibration_tip:
+            self.__draw_field()
+            self.__draw_gesture_field()
+            self.__process_game_state_and_cursor(state)
+            self.__draw_bottom_hint(state)
+            self.__render_recognition_frame_hint()
         else:
             self.__draw_field()
             self.__draw_gesture_field()
