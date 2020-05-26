@@ -1,34 +1,29 @@
 import pygame
-from engine.tick_generator import TickGenerator
+from engine.tick_generator import RunLoop, RunLoopMember
 from renderers.pygame_renderer import PyGameRenderer
 from game_logic.ai_player import *
 from ai.minimax_strategy import *
-from engine.publishsubject import PublishSubject
+from engine.publishsubject import PublishSubject, PublishReceiver
 from renderers.resource_loader import ResourceLoader
-from scene.tictactoe33scenewithcalibration import *
+from scene.tictactoedefault33scene import *
 from cv.nn_input import *
 from cv.cv_input_controller import CvInputConroller
+from engine.camera_frame_updater import CameraFrameUpdater, CameraFrameUpdaterWithDebugBlending
+from cv.camera_frame_receiver import *
 
 
-class SceneUpdateWrapper:
-    def __init__(self, update_lambda):
-        self.update_lambda = update_lambda
-
-    def update(self, game_state):
-        print("receive frame update")
-        self.update_lambda(game_state)
-
-
-class Executor:
+class Executor(RunLoopMember):
     def __init__(self, executed_fn):
+        RunLoopMember.__init__(self)
         self.executed_fn = executed_fn
 
     def tick(self):
         self.executed_fn()
 
 
-class KeyboardInputReceiver:
+class KeyboardInputReceiver(RunLoopMember):
     def __init__(self, scene, cv_input):
+        RunLoopMember.__init__(self)
         self.scene = scene
         self.cv_input = cv_input
         pygame.init()
@@ -51,44 +46,38 @@ class KeyboardInputReceiver:
                     self.cv_input.calibrate()
 
 
-class CameraFrameUpdater:
-    def __init__(self, cv_engine, renderer):
-        self.cv_engine = cv_engine
-        self.renderer = renderer
+tick_generator = RunLoop(120)
 
-    def tick(self):
-        frame = self.cv_engine.last_processed_frame
-        if frame is not None:
-            self.renderer.set_camera_frame(frame)
-
-
-scene_state_subject = PublishSubject()
-scene = TicTacToe33SceneWithController(scene_state_subject.update_subject)
+scene_state_subject = PublishSubject(tick_generator)
+scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
 
 loader = ResourceLoader.with_default_params()
 renderer = PyGameRenderer(loader)
 
 
-cv_input = CvInputConroller(scene, 1, loader)
-# cv_input = NNInputController(scene, loader)
-scene.set_cv_controller(cv_input)
-cv_input.start()
+cv_input = CvInputConroller(scene, 1, loader) #NNInputController(scene, loader)
+# tick_generator.schedule_delayed_callback(10, lambda: cv_input.calibrate())
 
+# cv_input = NNInputController(scene, loader)
 scene_state_subject._subject_state = scene.get_render_model()
 
 
 renderer.setup_with_field(scene.get_render_model().game_state)
-tick_generator = TickGenerator(120)
+frame_update_subject = PublishSubject(tick_generator)
+camera_frame_receiver = CameraFrameReceiver(frame_update_subject.update_subject)
+camera_frame_receiver.start()
+
+frame_update_subject.attach(PublishReceiver(lambda x: cv_input.process_frame(x)))
 
 tick_generator.add_subscriber(KeyboardInputReceiver(scene, cv_input))
+tick_generator.add_subscriber(camera_frame_receiver)
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
-tick_generator.add_subscriber(cv_input)
-tick_generator.add_subscriber(CameraFrameUpdater(cv_input, renderer))
+tick_generator.add_subscriber(CameraFrameUpdaterWithDebugBlending(camera_frame_receiver, renderer, cv_input))
 
-input_x, input_o = scene.get_input_controllers()
+instant_input_o = scene.create_instant_move_controller(Player.O)
+ai_player = AiPlayer(instant_input_o, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.O), Player.O)
 
-scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.X), Player.O, scene), True)
-
+scene_state_subject.attach(ai_player, True)
 tick_generator.run_ticks()
 
 

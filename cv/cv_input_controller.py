@@ -1,23 +1,22 @@
 import cv2
 import numpy as np
-import cv.camera as camera
 import cv.cv_utils as cv_utils
 import cv.constants as constants
 import cv.geometry_utils as geometry_utils
 import cv.input_generator as input_generator
 import cv.image_background_remove as image_background_remove
-import math
+from cv.cv_input_model import CvInputModel
 from model.input import *
 import time
 
-class CvInputConroller:
+
+class CvInputConroller(CvInputModel):
     def __init__(self, scene, input_quantization_seconds, resource_loaer):
-        self.camera = camera.Camera()
+        CvInputModel.__init__(self, scene)
+
         self.imageBackgroundRemover = None
-        self.scene = scene
         self.input_quantization_seconds = input_quantization_seconds
         self.last_input_submitted = time.time()
-        self.last_processed_frame = None
         self.previous_command = None
         self.previous_frame = None
         self.background = None
@@ -25,32 +24,20 @@ class CvInputConroller:
         self.hatched_image = cv2.imread(resource_loaer.get_path_for_asset('hatch_texture.png'))
         self.hatched_image = cv2.resize(self.hatched_image, (220, 220))
 
-    def start(self):
-        self.camera.start_recording()
-
-    def stop_and_destroy_windows(self):
-        self.camera.stop_recording()
+        self.debug_frame = None
 
     def calibrate(self):
         self.imageBackgroundRemover = image_background_remove.ImageBackgroundRemover()
         self.background = self.previous_frame
         print('calibrated')
 
-    def remember_camera_frame(self, new_frame):
-        new_frame = cv2.resize(new_frame, (constants.UI_WINDOW_WIDTH, constants.UI_WINDOW_HEIGHT))
-        recolored_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)
-        recolored_frame = recolored_frame.swapaxes(0, 1)
-        self.last_processed_frame = recolored_frame
-
-
-    def tick(self):
+    def process_frame(self, frame):
         """
             Main CV gesture recognition process
             Calibration process without hand is needed at first
             Consecutive process of filtering and masking implemented
             Uses learning background subtraction model
         """
-        frame = self.camera.get_current_frame()
         frame = cv2.resize(frame, (800, 450))
         if self.imageBackgroundRemover is not None and self.imageBackgroundRemover.calibrated:
             img = self.imageBackgroundRemover.remove_background_from_image(frame)
@@ -92,19 +79,20 @@ class CvInputConroller:
                         self.make_input(Input.ENTER)
             self.hatch_detected_hand(frame, thresh)
             self.previous_frame = blur
-        self.remember_camera_frame(frame)
 
     def hatch_detected_hand(self, frame, thresh):
         begin_recognition_frame_x = int(constants.ROI_X_START * frame.shape[1])
         begin_recognition_frame_y = int(frame.shape[0] * constants.ROI_Y_START)
         colored_tresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
-        region = frame[begin_recognition_frame_y:begin_recognition_frame_y + thresh.shape[0],
-                 begin_recognition_frame_x:begin_recognition_frame_x + thresh.shape[1]]
+        region = np.zeros((thresh.shape[1], thresh.shape[0], 3), dtype=np.uint8)
+        # frame[begin_recognition_frame_y:begin_recognition_frame_y + thresh.shape[0],
+        #          begin_recognition_frame_x:begin_recognition_frame_x + thresh.shape[1]]
         g = cv2.bitwise_and(self.hatched_image, colored_tresh)
-        g = cv2.multiply(g, g)
-        region = cv2.subtract(region, g)
-        frame[begin_recognition_frame_y:begin_recognition_frame_y + thresh.shape[0],
-        begin_recognition_frame_x:begin_recognition_frame_x + thresh.shape[1]] = region
+        # g = cv2.multiply(g, g)
+        # region = cv2.subtract(region, g)
+        # frame[begin_recognition_frame_y:begin_recognition_frame_y + thresh.shape[0],
+        # begin_recognition_frame_x:begin_recognition_frame_x + thresh.shape[1]] = region
+        self.debug_frame = g
 
     def make_input(self, command):
         current_timestamp = time.time()

@@ -49,8 +49,8 @@ class TicTacToeDefault33Scene:
 
         self.before_get_render_model()
 
-        instruction_length = 1
-        calibration_length = 1
+        instruction_length = 5
+        calibration_length = 5
         should_render_start_tip = time.time() - self.game_begin_timestamp < instruction_length
         should_render_calibration_tip = instruction_length < time.time() - self.game_begin_timestamp \
                                         < instruction_length + calibration_length
@@ -64,6 +64,12 @@ class TicTacToeDefault33Scene:
         def controller(input):
             if self.game.state.turn == player:
                 self.receive_input(input)
+        return controller
+
+    def create_instant_move_controller(self, player):
+        def controller(input_coordinate):
+            if self.game.state.turn == player:
+                self.instant_move(input_coordinate)
         return controller
 
     def get_input_controllers(self):
