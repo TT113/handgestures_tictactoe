@@ -22,7 +22,7 @@ class NNInputController:
             5: None
         }
         self.scene = scene
-        self.model = load_model(resource_loader.get_path_for_asset("new_best.h5"))
+        self.model = load_model(resource_loader.get_path_for_asset(constants.NN_MODEL_WEIGHTS_PATH))
         self.last_input_submitted = time.time()
         self.last_commands = []
 
@@ -32,7 +32,7 @@ class NNInputController:
     def remember_camera_frame(self, new_frame):
         new_frame = cv2.resize(new_frame, (constants.UI_WINDOW_WIDTH, constants.UI_WINDOW_HEIGHT))
         recolored_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)
-        recolored_frame = recolored_frame.swapaxes(0,1)
+        recolored_frame = recolored_frame.swapaxes(0, 1)
         self.last_processed_frame = recolored_frame
 
     def mapper(self, val):
@@ -47,7 +47,7 @@ class NNInputController:
                                   (int(frame.shape[0] * constants.ROI_Y_START),
                                    int((constants.ROI_Y_START * frame.shape[0] + constants.ROI_SIZE * frame.shape[1]))))
 
-        img = cv2.resize(img, (225, 225))
+        img = cv2.resize(img, (constants.NN_IMAGE_INPUT_SIZE, constants.NN_IMAGE_INPUT_SIZE))
         prediction = self.model.predict(np.array([img]))
         gesture_numeric = np.argmax(prediction[0])
         gesture_name = self.mapper(gesture_numeric)
@@ -60,11 +60,12 @@ class NNInputController:
             self.last_commands = []
             return
         print(input)
-        if len(self.last_commands) >= 9:
+        if len(self.last_commands) >= constants.NN_GESTURE_CONFIRMATION_SEQUENCE_LENGTH:
             ctr = Counter(self.last_commands)
             for command in ctr:
                 count = ctr[command]
-                if count > 7 and command is not None:
+                if count > constants.NN_GESTURE_CONFIRMATION_COUNT \
+                        and command is not None:
                     self.scene.receive_input(command)
             self.last_commands = []
         self.last_commands.append(input)

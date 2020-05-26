@@ -1,6 +1,8 @@
 import cv2
 import cv.constants as constants
 import copy
+import math
+
 
 def flip_frame(frame):
     """Flips the frame horizontally for usability"""
@@ -8,6 +10,7 @@ def flip_frame(frame):
 
 
 def crop_frame(frame, x_range, y_range):
+    """Crops the frame by X, Y region"""
     return frame[y_range[0]:y_range[1], x_range[0]: x_range[1]]
 
 
@@ -24,7 +27,7 @@ def perform_gaussian_blur(frame, constant):
 
 
 def smooth_frame(frame):
-    # smoothing for noise removing
+    """smoothing for noise removing"""
     return cv2.bilateralFilter(frame, 5, 90, 150)
 
 
@@ -72,3 +75,27 @@ def get_convex_hull(points):
         return cv2.convexHull(points)
     else:
         return None
+
+
+def calculate_fingers(res):
+    hull = cv2.convexHull(res, returnPoints=False)
+    if len(hull) > 3:
+        defects = cv2.convexityDefects(res, hull)
+        if defects is not None:
+            cnt = 0
+            for i in range(defects.shape[0]):
+                s, e, f, d = defects[i][0]
+                start = tuple(res[s][0])
+                end = tuple(res[e][0])
+                far = tuple(res[f][0])
+                a = math.sqrt((end[0] - start[0]) ** 2 +
+                              (end[1] - start[1]) ** 2)
+                b = math.sqrt((far[0] - start[0]) ** 2 +
+                              (far[1] - start[1]) ** 2)
+                c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
+                angle = math.acos((b ** 2 + c ** 2 - a ** 2) /
+                                  (2 * b * c))  # cosine theorem
+                if angle <= math.pi * 0.5:  # angle less than 90 degree, treat as fingers
+                    cnt += 1
+            return cnt
+    return 0

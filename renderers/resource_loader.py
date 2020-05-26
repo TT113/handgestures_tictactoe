@@ -16,6 +16,7 @@ default_layout_params = {
     'crosses_wins_asset_name': 'crosses_wins.png',
     'noughts_wins_asset_name': 'nougts_wins.png',
     'start_hint_asset_name': 'start_hint.png',
+    'font_type': 'lucidagrande.ttf'
 }
 
 
@@ -30,21 +31,20 @@ class ResourceLoader:
 
     @staticmethod
     def get_path_for_asset( name):
-        # support for pyinstaller
+        """ support for pyinstaller """
         if hasattr(sys, '_MEIPASS'):
             chdir(sys._MEIPASS)
         elif '_MEIPASS2' in os.environ:
             chdir(os.environ['_MEIPASS2'])
         else:
-            print('else default')
-
+            pass
         current_path = os.getcwd()
         resource_path = os.path.join(current_path, 'resources')
         image_path = os.path.join(resource_path, name)
         return image_path
 
     def get_font(self):
-        path = self.get_path_for_asset('lucidagrande.ttf')
+        path = self.get_path_for_asset(self.layout_params['font_type'])
         return pygame.font.Font(path, 32)
 
     def __get_scaled_asset(self, asset_name, size, cached_name=None):
@@ -85,7 +85,7 @@ class ResourceLoader:
 
     def get_frame_asset(self, length):
         name = self.layout_params['frame_asset_name']
-        return self.__get_scaled_asset(name, (length,length), name + str(length))
+        return self.__get_scaled_asset(name, (length, length), name + str(length))
 
     def get_start_hint_asset(self):
         return self.__get_scaled_asset(self.layout_params['start_hint_asset_name'], None)

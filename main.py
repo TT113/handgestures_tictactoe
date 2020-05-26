@@ -7,6 +7,7 @@ from engine.publishsubject import PublishSubject
 from renderers.resource_loader import ResourceLoader
 from scene.tictactoe33scenewithcalibration import *
 from cv.nn_input import *
+from cv.cv_input_controller import CvInputConroller
 
 
 class SceneUpdateWrapper:
@@ -68,7 +69,8 @@ loader = ResourceLoader.with_default_params()
 renderer = PyGameRenderer(loader)
 
 
-cv_input = NNInputController(scene, loader)
+cv_input = CvInputConroller(scene, 1, loader)
+# cv_input = NNInputController(scene, loader)
 scene.set_cv_controller(cv_input)
 cv_input.start()
 

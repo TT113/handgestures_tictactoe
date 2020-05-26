@@ -1,7 +1,4 @@
-import os
-
 import pygame
-
 from model.cell_occupation import CellOccupation
 import cv.constants as constants
 from model.move_result import MoveResult
@@ -10,11 +7,8 @@ from model.winner import *
 
 
 class PyGameRenderer:
-
     def __init__(self, resource_loader):
         pygame.init()
-        self.field_edges_color = (64, 128, 255)
-
         self.resource_loader = resource_loader
 
         #defaults params
@@ -147,10 +141,9 @@ class PyGameRenderer:
 
     def render(self, state):
         if self.camera_frame is not None:
-            self.sc.blit(self.camera_frame, (0,0))
+            self.sc.blit(self.camera_frame,(0, 0))
         else:
-            self.sc.fill((255,255,255))
-
+            self.sc.fill((255, 255, 255))
         if state.scene_state.should_render_start_tip:
             self.__draw_start_game_hint(time.time() - state.scene_state.game_begin_timestamp)
         elif state.scene_state.should_render_calibration_tip:

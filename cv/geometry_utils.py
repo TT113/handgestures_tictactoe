@@ -11,17 +11,19 @@ def relax_convex_hull(hull, img_shape):
     """ sequential relaxing of convex hull points
     hull - np array, shape = (N,1,2)
     """
+
     hull_relaxed = np.array([hull[0]])
     for i in range(1, len(hull)):
-        # print(img_shape, hull[i])
         if np.linalg.norm(hull_relaxed[-1]-hull[i][0]) > constants.CONVEX_HULL_RELAX_THRESHOLD:
             hull_relaxed = np.append(hull_relaxed, [hull[i]], axis=0)
-    if len(hull_relaxed) > 2 and np.linalg.norm(hull_relaxed[0]-hull_relaxed[-1]) < constants.CONVEX_HULL_RELAX_THRESHOLD:
+    if len(hull_relaxed) > constants.MINIMAL_ACCEPTED_QUANTITY_OF_VERTICES\
+            and np.linalg.norm(hull_relaxed[0]-hull_relaxed[-1]) < constants.CONVEX_HULL_RELAX_THRESHOLD:
         hull_relaxed = np.delete(hull_relaxed, -1, 0)
     return hull_relaxed
 
 
 def get_angle_between_vectors(a, b, c):
+    """Basing on cosine theorem"""
     a_norm = np.linalg.norm(a)
     b_norm = np.linalg.norm(b)
     c_norm = np.linalg.norm(c)
@@ -46,15 +48,16 @@ def validate_convex_hull(hull, img_shape):
     else:
         hull = relax_convex_hull(hull, img_shape)
         hull_area = cv_utils.get_contour_area(hull)
-        return hull if (hull.shape[0] > 3 and
-                        0.15 * roi_area < hull_area < roi_area * 0.95) else None
+        return hull if (hull.shape[0] > constants.MINIMAL_ACCEPTED_QUANTITY_OF_VERTICES and
+                        constants.MIN_CONVEX_HULL_SQUARE_IN_SCREEN_PERCENTAGE * roi_area
+                        < hull_area < roi_area * constants.MAX_CONVEX_HULL_SQUARE_IN_SCREEN_PERCENTAGE) \
+            else None
 
 
 def get_polygon_angles(polygon):
     angles = []
     polygon = np.append(np.array([polygon[-1]]), np.append(polygon, [polygon[0]], axis=0), axis=0)
     length = len(polygon)-1
-
     for i in range(1, length):
         a = polygon[i][0] - polygon[i-1][0]
         b = polygon[i + 1][0] - polygon[i][0]

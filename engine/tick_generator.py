@@ -14,6 +14,7 @@ class TickGenerator:
             timestamp = time.time()
             timestamp_should_end_tick = timestamp + 1 / self.frequency_hz
 
+            """uncomment for performance check"""
             # print('begin loop')
             for subscriber in self.subscribers:
                 # timestamp_begin_subscriber = time.time()
