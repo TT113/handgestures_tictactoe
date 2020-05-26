@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Input(Enum):
     TOP_ARROW = 0
     BOTTOM_ARROW = 1

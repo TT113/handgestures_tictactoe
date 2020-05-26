@@ -4,7 +4,6 @@ from model.winner import Winner
 
 
 class TicTacToeDefaultWinnerCheckStrategy:
-
     def check(self, field):
         board_controller = GameFieldController(field)
         if board_controller.height != 3 or board_controller.width != 3:
@@ -34,7 +33,6 @@ class TicTacToeDefaultWinnerCheckStrategy:
             return Winner.O
 
         return Winner.NONE
-
 
     @staticmethod
     def check_line(line):

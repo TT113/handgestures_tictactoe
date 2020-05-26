@@ -1,13 +1,12 @@
 import pygame
-
-from display.engine import TickGenerator, TickSplitter
+from engine.tick_generator import TickGenerator
 from renderers.pygame_renderer import PyGameRenderer
-from cv.cv_input_controller import CvInputConroller
 from game_logic.ai_player import *
 from ai.minimax_strategy import *
-from utils.PublishSubject import Subject
+from engine.publishsubject import PublishSubject
 from renderers.resource_loader import ResourceLoader
-from display.tictactoe33scenewithcalibration import *
+from scene.tictactoe33scenewithcalibration import *
+from cv.nn_input import *
 
 
 class SceneUpdateWrapper:
@@ -62,14 +61,14 @@ class CameraFrameUpdater:
             self.renderer.set_camera_frame(frame)
 
 
-scene_state_subject = Subject()
+scene_state_subject = PublishSubject()
 scene = TicTacToe33SceneWithController(scene_state_subject.update_subject)
 
 loader = ResourceLoader.with_default_params()
 renderer = PyGameRenderer(loader)
 
 
-cv_input = CvInputConroller(scene, 1, loader)
+cv_input = NNInputController(scene, loader)
 scene.set_cv_controller(cv_input)
 cv_input.start()
 
@@ -88,7 +87,6 @@ input_x, input_o = scene.get_input_controllers()
 
 scene_state_subject.attach(AiPlayer(input_x, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.X), Player.O, scene), True)
 
-# cv_input.calibrate()
 tick_generator.run_ticks()
 
 

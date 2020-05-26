@@ -17,7 +17,7 @@ class PyGameRenderer:
 
         self.resource_loader = resource_loader
 
-        #defaults
+        #defaults params
         self.field_width_cells = 3
         self.field_height_cells = 3
 
@@ -77,7 +77,6 @@ class PyGameRenderer:
         field_resource = self.resource_loader.get_nought_asset(self.field_side_dimension/5)
         self.sc.blit(field_resource, coordinates)
 
-
     def __draw_cursor(self, coordinate, valid):
         cell_coordinate = self.__get_cell_rect_coordinates(coordinate)
         field_resource = self.resource_loader.get_cursor_asset(valid, self.field_side_dimension/2)
@@ -94,7 +93,6 @@ class PyGameRenderer:
         resource = self.resource_loader.get_generic_asset('gaming_hint.png')
         self.sc.blit(resource, (100, 570))
 
-
     def __draw_gesture_field_hint(self):
         palm_hint = self.resource_loader.get_generic_asset('palm_hint.png')
         self.sc.blit(palm_hint, (125, 60))
@@ -107,7 +105,6 @@ class PyGameRenderer:
         if seconds in self.rendered_numbers:
             second_surface = self.rendered_numbers[seconds]
             self.sc.blit(second_surface, (700,655))
-
 
     def __process_game_state_and_cursor(self, state):
         if state.game_state.last_move_coordinate is not None:
@@ -141,13 +138,12 @@ class PyGameRenderer:
                 asset = self.resource_loader.get_generic_asset('calibration_hint.png')
                 self.sc.blit(asset, (100, 570))
                 time_since_game_begin = time.time() - state.scene_state.game_begin_timestamp
-                seconds = str(20 - int(time_since_game_begin))
+                seconds = str(30 - int(time_since_game_begin))
                 if seconds in self.rendered_numbers:
                     second_surface = self.rendered_numbers[seconds]
                     self.sc.blit(second_surface, (770, 645))
             else:
                 self.__draw_gaming_hint()
-
 
     def render(self, state):
         if self.camera_frame is not None:
@@ -169,11 +165,4 @@ class PyGameRenderer:
             self.__draw_gesture_field_hint()
             self.__process_game_state_and_cursor(state)
             self.__draw_bottom_hint(state)
-
-
-
         pygame.display.update()
-
-        #
-        # print('cursor: ' + str(model.cursor_position))
-        # print('last move result: ' + str(model.last_move_result))

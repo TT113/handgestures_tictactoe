@@ -1,5 +1,4 @@
 import sys
-
 import os
 import pygame
 from os import chdir
@@ -21,7 +20,6 @@ default_layout_params = {
 
 
 class ResourceLoader:
-
     @staticmethod
     def with_default_params():
         return ResourceLoader(default_layout_params)
@@ -30,7 +28,8 @@ class ResourceLoader:
         self.layout_params = layout_params
         self.cached_resources = {}
 
-    def get_path_for_asset(self, name):
+    @staticmethod
+    def get_path_for_asset( name):
         # support for pyinstaller
         if hasattr(sys, '_MEIPASS'):
             chdir(sys._MEIPASS)
@@ -39,27 +38,13 @@ class ResourceLoader:
         else:
             print('else default')
 
-        current_path = os.getcwd()  # Where your .py file is located
-        resource_path = os.path.join(current_path, 'resources')  # The resource folder path
-        image_path = os.path.join(resource_path, name)
-        return image_path
-
-    def __get_path_for_asset(self, name):
-        # support for pyinstaller
-        if hasattr(sys, '_MEIPASS'):
-            chdir(sys._MEIPASS)
-        elif '_MEIPASS2' in os.environ:
-            chdir(os.environ['_MEIPASS2'])
-        else:
-            print('else default')
-
-        current_path = os.getcwd()  # Where your .py file is located
-        resource_path = os.path.join(current_path, 'resources')  # The resource folder path
+        current_path = os.getcwd()
+        resource_path = os.path.join(current_path, 'resources')
         image_path = os.path.join(resource_path, name)
         return image_path
 
     def get_font(self):
-        path = self.__get_path_for_asset('lucidagrande.ttf')
+        path = self.get_path_for_asset('lucidagrande.ttf')
         return pygame.font.Font(path, 32)
 
     def __get_scaled_asset(self, asset_name, size, cached_name=None):
@@ -69,7 +54,7 @@ class ResourceLoader:
         if name_for_cache in self.cached_resources:
             return self.cached_resources[name_for_cache]
 
-        asset = pygame.image.load(self.__get_path_for_asset(asset_name))
+        asset = pygame.image.load(self.get_path_for_asset(asset_name))
         if size is not None:
             asset = pygame.transform.scale(asset, (int(size[0]), int(size[1])))
         self.cached_resources[name_for_cache] = asset
@@ -78,7 +63,6 @@ class ResourceLoader:
     def get_generic_asset(self, name):
         asset = self.__get_scaled_asset(name, None)
         return asset
-
 
     def get_field_asset(self, length):
         asset_name = self.layout_params['board_asset_name']

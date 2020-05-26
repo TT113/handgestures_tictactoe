@@ -1,6 +1,5 @@
 from model.cell_occupation import CellOccupation
 from model.coordinate import Coordinate
-from model.player import Player
 
 
 class GameFieldController:
@@ -18,7 +17,6 @@ class GameFieldController:
     def set_cell(self, coordinate, cell_occupation):
         if not self.validate_position(coordinate):
             return
-
         self.field[coordinate.y][coordinate.x] = cell_occupation
 
     def validate_position(self, coordinate):
@@ -34,7 +32,7 @@ class GameFieldController:
         occupations = []
         for i in range(self.height):
             for j in range(self.width):
-                cell = self.get_cell(Coordinate(i,j))
+                cell = self.get_cell(Coordinate(i, j))
                 if cell == CellOccupation.X:
                     occupations.append('X')
                 if cell == CellOccupation.O:

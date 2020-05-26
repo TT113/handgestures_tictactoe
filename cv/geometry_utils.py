@@ -1,9 +1,10 @@
 import numpy as np
 import cv.constants as constants
-import cv.math_utils as math_utils
 import cv.cv_utils as cv_utils
 from model.input import Input
 import math
+
+PI_D = 180  # pi in degrees
 
 
 def relax_convex_hull(hull, img_shape):
@@ -14,16 +15,21 @@ def relax_convex_hull(hull, img_shape):
     for i in range(1, len(hull)):
         # print(img_shape, hull[i])
         if np.linalg.norm(hull_relaxed[-1]-hull[i][0]) > constants.CONVEX_HULL_RELAX_THRESHOLD:
-              #  or \
-               # hull[i][0][0] <=  constants.CONVEX_HULL_RELAX_THRESHOLD or \
-               # abs(hull[i][0][0] - img_shape[0])<= constants.CONVEX_HULL_RELAX_THRESHOLD:
             hull_relaxed = np.append(hull_relaxed, [hull[i]], axis=0)
-
     if len(hull_relaxed) > 2 and np.linalg.norm(hull_relaxed[0]-hull_relaxed[-1]) < constants.CONVEX_HULL_RELAX_THRESHOLD:
         hull_relaxed = np.delete(hull_relaxed, -1, 0)
-
     return hull_relaxed
 
+
+def get_angle_between_vectors(a, b, c):
+    a_norm = np.linalg.norm(a)
+    b_norm = np.linalg.norm(b)
+    c_norm = np.linalg.norm(c)
+    return np.degrees(np.arccos((a_norm**2+b_norm**2-c_norm**2)/2/a_norm/b_norm))
+
+
+def distance_between_points(a, b):
+    return np.linalg.norm(a - b)
 
 
 def select_external_contour(contours):
@@ -53,27 +59,24 @@ def get_polygon_angles(polygon):
         a = polygon[i][0] - polygon[i-1][0]
         b = polygon[i + 1][0] - polygon[i][0]
         c = polygon[i + 1][0] - polygon[i-1][0]
-        angles.append(round(math_utils.get_angle_between_vectors(a, b, c), 2))
+        angles.append(round(get_angle_between_vectors(a, b, c), 2))
     return angles
-
 
 
 def get_angle_between_vector_and_x_axis(vector):
     """return value between [0, 2pi]"""
-    res =  math_utils.PI_D + np.degrees(np.arctan2(vector[1], vector[0]))
+    res =  PI_D + np.degrees(np.arctan2(vector[1], vector[0]))
     return res if res > 0 else np.degrees(math.pi*2)+res
-
-from enum import Enum
 
 
 def get_vector_direction(vector):
     angle = get_angle_between_vector_and_x_axis(vector)
-    if angle <= constants.DIRECTION_ANGLES_OFFSET or 2*math_utils.PI_D - angle <= constants.DIRECTION_ANGLES_OFFSET:
+    if angle <= constants.DIRECTION_ANGLES_OFFSET or 2*PI_D - angle <= constants.DIRECTION_ANGLES_OFFSET:
         return Input.LEFT_ARROW
-    elif abs(math_utils.PI_D / 2 - angle) <= constants.DIRECTION_ANGLES_OFFSET:
+    elif abs(PI_D / 2 - angle) <= constants.DIRECTION_ANGLES_OFFSET:
         return Input.TOP_ARROW
-    elif abs(math_utils.PI_D - angle) <= constants.DIRECTION_ANGLES_OFFSET:
+    elif abs(PI_D - angle) <= constants.DIRECTION_ANGLES_OFFSET:
         return Input.RIGHT_ARROW
-    elif abs(3*math_utils.PI_D/2 - angle) <= constants.DIRECTION_ANGLES_OFFSET:
+    elif abs(3*PI_D/2 - angle) <= constants.DIRECTION_ANGLES_OFFSET:
         return Input.BOTTOM_ARROW
 

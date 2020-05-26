@@ -2,8 +2,8 @@ from game_logic.game_state_controller import *
 from model.coordinate import *
 from model.winner import *
 from collections import namedtuple
+from model.player import Player
 
-# ScoredMove = namedtuple('IndexedMove', ['coordinate', 'score'])
 MinimaxResult = namedtuple('MinimaxResult', ['score', 'coordinate'])
 
 
@@ -15,9 +15,7 @@ class MinimaxStrategy:
             self.opponent_player = Player.O
         else:
             self.opponent_player = Player.X
-
         self.cache = {}
-
 
     def __put_cached(self, hash, move_result):
         self.cache[hash] = move_result
