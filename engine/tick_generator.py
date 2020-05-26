@@ -27,10 +27,11 @@ class RunLoopMember:
 
 
 class RunLoop:
-    def __init__(self, frequency_hz):
+    def __init__(self, frequency_hz, id):
         self.frequency_hz = frequency_hz
         self.subscribers = []
         self.callback_set = []
+        self.id = id
 
     def add_subscriber(self, subscriber):
         subscriber.runloop = self
@@ -51,14 +52,13 @@ class RunLoop:
                 self.callback_set.remove(invoked_callback)
 
             """uncomment for performance check"""
-            # print('begin loop')
+            # print('begin loop ', self.id)
             for subscriber in self.subscribers:
                 # timestamp_begin_subscriber = time.time()
                 subscriber.tick()
-                # print(type(subscriber), time.time() - timestamp_begin_subscriber)
+                # if self.id == "ui":
+                #     print(type(subscriber), time.time() - timestamp_begin_subscriber)
             finished_tick_timestamp = time.time()
-            #
-            # print('end loop', finished_tick_timestamp - timestamp)
 
             if finished_tick_timestamp < timestamp_should_end_tick:
                 remaining_time = timestamp_should_end_tick - finished_tick_timestamp

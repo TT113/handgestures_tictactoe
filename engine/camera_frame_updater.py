@@ -31,7 +31,8 @@ class CameraFrameUpdaterWithDebugBlending(CameraFrameUpdater):
         frame = self.frame_receiver.last_processed_frame
 
         if debug_frame is None:
-            self.renderer.set_camera_frame(frame)
+            if frame is not None:
+                self.renderer.set_camera_frame(frame)
             return
 
         debug_frame = self.__transform_frame(debug_frame)
@@ -51,6 +52,7 @@ class CameraFrameUpdaterWithDebugBlending(CameraFrameUpdater):
         frame[begin_recognition_frame_y:begin_recognition_frame_y + debug_frame.shape[0],
         begin_recognition_frame_x:begin_recognition_frame_x + debug_frame.shape[1]] = under_frame
 
-        self.renderer.set_camera_frame(frame)
+        if frame is not None:
+            self.renderer.set_camera_frame(frame)
 
 

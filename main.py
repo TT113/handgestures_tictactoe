@@ -46,7 +46,19 @@ class KeyboardInputReceiver(RunLoopMember):
                     self.cv_input.calibrate()
 
 
-tick_generator = RunLoop(120)
+from threading import Thread
+
+tick_generator = RunLoop(120, "ui")
+tick_generator_recognition = RunLoop(120, "calc")
+
+
+def start_calculation_thread():
+    print("start_another_thread")
+    tick_generator_recognition.run_ticks()
+
+
+thread = Thread(target=start_calculation_thread)
+thread.start()
 
 scene_state_subject = PublishSubject(tick_generator)
 scene = TicTacToeDefault33Scene(scene_state_subject.update_subject)
@@ -55,15 +67,15 @@ loader = ResourceLoader.with_default_params()
 renderer = PyGameRenderer(loader)
 
 
-cv_input = CvInputConroller(scene, 1, loader) #NNInputController(scene, loader)
+# cv_input = CvInputConroller(scene, 1, loader) #NNInputController(scene, loader)
 # tick_generator.schedule_delayed_callback(10, lambda: cv_input.calibrate())
 
-# cv_input = NNInputController(scene, loader)
+cv_input = NNInputController(scene, loader)
 scene_state_subject._subject_state = scene.get_render_model()
 
 
 renderer.setup_with_field(scene.get_render_model().game_state)
-frame_update_subject = PublishSubject(tick_generator)
+frame_update_subject = PublishSubject(tick_generator_recognition)
 camera_frame_receiver = CameraFrameReceiver(frame_update_subject.update_subject)
 camera_frame_receiver.start()
 
@@ -72,7 +84,8 @@ frame_update_subject.attach(PublishReceiver(lambda x: cv_input.process_frame(x))
 tick_generator.add_subscriber(KeyboardInputReceiver(scene, cv_input))
 tick_generator.add_subscriber(camera_frame_receiver)
 tick_generator.add_subscriber(Executor(lambda: renderer.render(scene.get_render_model())))
-tick_generator.add_subscriber(CameraFrameUpdaterWithDebugBlending(camera_frame_receiver, renderer, cv_input))
+# tick_generator.add_subscriber(CameraFrameUpdaterWithDebugBlending(camera_frame_receiver, renderer, cv_input))
+tick_generator.add_subscriber(CameraFrameUpdater(camera_frame_receiver, renderer))
 
 instant_input_o = scene.create_instant_move_controller(Player.O)
 ai_player = AiPlayer(instant_input_o, MinimaxStrategy(TicTacToeDefaultWinnerCheckStrategy(), Player.O), Player.O)

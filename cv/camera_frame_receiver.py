@@ -27,6 +27,7 @@ class CameraFrameReceiver(RunLoopMember):
     def tick(self):
         if not self.is_started:
             return
+
         frame = self.camera.get_current_frame()
         self.new_frame_callback(frame)
 
