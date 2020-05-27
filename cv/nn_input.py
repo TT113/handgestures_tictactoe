@@ -24,6 +24,7 @@ class NNInputController(CvInputModel):
         self.model = load_model(resource_loader.get_path_for_asset(constants.NN_MODEL_WEIGHTS_PATH))
         self.last_input_submitted = time.time()
         self.last_commands = []
+        self.last_gesture_commit_timestamp = time.time()
 
     def mapper(self, val):
         return self.CATEGORY_MAP[val]
@@ -48,7 +49,7 @@ class NNInputController(CvInputModel):
             self.last_commands = []
             return
         print(input)
-        if len(self.last_commands) >= constants.NN_GESTURE_CONFIRMATION_SEQUENCE_LENGTH:
+        if len(self.last_commands) >= constants.NN_GESTURE_CONFIRMATION_SEQUENCE_LENGTH and time.time() - self.last_gesture_commit_timestamp > 1:
             ctr = Counter(self.last_commands)
             for command in ctr:
                 count = ctr[command]

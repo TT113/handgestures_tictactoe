@@ -13,6 +13,24 @@ default_layout_params = {
 
     'palm_hint_asset_name': 'palm_hint.png',
     'gaming_hint_asset_name': 'gaming_hint.png',
+    'calibration_hint_asset_name': 'calibration_hint.png',
+    'crosses_wins_asset_name': 'crosses_wins.png',
+    'noughts_wins_asset_name': 'nougts_wins.png',
+    'start_hint_asset_name': 'start_hint.png',
+    'font_type': 'lucidagrande.ttf'
+}
+
+
+default_layout_params_nn = {
+    'board_asset_name': 'field.png',
+    'nought_asset_name': 'nought.png',
+    'cross_asset_name': 'cross.png',
+    'cursor_invalid_asset_name': 'cursor_invalid.png',
+    'cursor_valid_asset_name': 'cursor.png',
+    'frame_asset_name': 'frame.png',
+    'calibration_hint_asset_name': 'calibration_hint.png',
+    'palm_hint_asset_name': 'palm_hint.png',
+    'gaming_hint_asset_name': 'gaming_hint_nn.png',
     'crosses_wins_asset_name': 'crosses_wins.png',
     'noughts_wins_asset_name': 'nougts_wins.png',
     'start_hint_asset_name': 'start_hint.png',
@@ -24,6 +42,10 @@ class ResourceLoader:
     @staticmethod
     def with_default_params():
         return ResourceLoader(default_layout_params)
+
+    @staticmethod
+    def with_nn_params():
+        return ResourceLoader(default_layout_params_nn)
 
     def __init__(self, layout_params):
         self.layout_params = layout_params
@@ -90,3 +112,8 @@ class ResourceLoader:
     def get_start_hint_asset(self):
         return self.__get_scaled_asset(self.layout_params['start_hint_asset_name'], None)
 
+    def get_in_game_bottom_hint(self):
+        return self.__get_scaled_asset(self.layout_params['gaming_hint_asset_name'], None)
+
+    def get_calibration_bottom_hint(self):
+        return self.__get_scaled_asset(self.layout_params['calibration_hint_asset_name'], None)

@@ -4,6 +4,7 @@ import cv.constants as constants
 from model.move_result import MoveResult
 import time
 from model.winner import *
+from model.tip_model import UIState
 
 
 class PyGameRenderer:
@@ -84,18 +85,19 @@ class PyGameRenderer:
         self.sc.blit(field_resource, (100, 170))
 
     def __draw_gaming_hint(self):
-        resource = self.resource_loader.get_generic_asset('gaming_hint.png')
+        resource = self.resource_loader.get_in_game_bottom_hint()
         self.sc.blit(resource, (100, 570))
 
     def __draw_gesture_field_hint(self):
         palm_hint = self.resource_loader.get_generic_asset('palm_hint.png')
         self.sc.blit(palm_hint, (125, 60))
 
-    def __draw_start_game_hint(self, seconds):
+    def __draw_start_game_hint(self, state):
         resource = self.resource_loader.get_start_hint_asset()
         self.sc.blit(resource, (280, 0))
 
-        seconds = str(10 - int(seconds))
+        seconds_since_game_begin = time.time() - state.scene_state.game_begin_timestamp
+        seconds = str(int(state.scene_state.ui_timing_entry.end_seconds - seconds_since_game_begin))
         if seconds in self.rendered_numbers:
             second_surface = self.rendered_numbers[seconds]
             self.sc.blit(second_surface, (700,655))
@@ -128,11 +130,13 @@ class PyGameRenderer:
                 asset = self.resource_loader.get_generic_asset('draw.png')
             self.sc.blit(asset,  (100, 570))
         else:
-            if state.scene_state.should_render_calibration_tip:
-                asset = self.resource_loader.get_generic_asset('calibration_hint.png')
+            has_tip = state.scene_state.ui_timing_entry is not None
+
+            if has_tip and state.scene_state.ui_timing_entry.tip_state == UIState.CALIBRATION:
+                asset = self.resource_loader.get_calibration_bottom_hint()
                 self.sc.blit(asset, (100, 570))
-                time_since_game_begin = time.time() - state.scene_state.game_begin_timestamp
-                seconds = str(30 - int(time_since_game_begin))
+                seconds_since_game_begin = time.time() - state.scene_state.game_begin_timestamp
+                seconds = str(int(state.scene_state.ui_timing_entry.end_seconds - seconds_since_game_begin))
                 if seconds in self.rendered_numbers:
                     second_surface = self.rendered_numbers[seconds]
                     self.sc.blit(second_surface, (770, 645))
@@ -144,9 +148,12 @@ class PyGameRenderer:
             self.sc.blit(self.camera_frame,(0, 0))
         else:
             self.sc.fill((255, 255, 255))
-        if state.scene_state.should_render_start_tip:
-            self.__draw_start_game_hint(time.time() - state.scene_state.game_begin_timestamp)
-        elif state.scene_state.should_render_calibration_tip:
+
+        has_tip = state.scene_state.ui_timing_entry is not None
+
+        if has_tip and state.scene_state.ui_timing_entry.tip_state == UIState.INITIAL_TIP:
+            self.__draw_start_game_hint(state)
+        elif has_tip and state.scene_state.ui_timing_entry.tip_state == UIState.CALIBRATION:
             self.__draw_field()
             self.__draw_gesture_field()
             self.__process_game_state_and_cursor(state)

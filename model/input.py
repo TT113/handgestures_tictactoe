@@ -8,3 +8,4 @@ class Input(Enum):
     RIGHT_ARROW = 3
     ENTER = 4
     NO_INPUT = 5
+    EXIT = 6
