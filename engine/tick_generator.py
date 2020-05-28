@@ -5,7 +5,7 @@ from queue import Queue
 import time
 
 
-Invocation = namedtuple('Invocation', ( 'fn', 'args', 'kwargs'))
+Invocation = namedtuple('Invocation', ('fn', 'args', 'kwargs'))
 
 
 class ScheduledInvocation:

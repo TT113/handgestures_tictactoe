@@ -36,7 +36,7 @@ def assemble_and_run_target(name):
         ])
     if name == 'nn':
         tip_strategy = ShowUIStrategyFromData([
-            UITimingEntry(0, 10, UIState.INITIAL_TIP),
+            UITimingEntry(0, 20, UIState.INITIAL_TIP),
         ])
     scene = TicTacToeDefault33Scene(scene_state_subject.update_subject, exit_usecase, tip_strategy)
     scene_state_subject._subject_state = scene.get_render_model()
@@ -75,6 +75,7 @@ def assemble_and_run_target(name):
     tick_generator.run_ticks()
 
 
+""" specify model target ("nn" - neural network, "cv" - background subtraction model)"""
 assemble_and_run_target('nn')
 
 
