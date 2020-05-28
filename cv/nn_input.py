@@ -21,7 +21,7 @@ class NNInputController(CvInputModel):
             4: Input.ENTER,
             5: None
         }
-        self.model = load_model(resource_loader.get_path_for_asset(constants.NN_MODEL_WEIGHTS_PATH))
+        self.model = load_model(resource_loader.get_path_for_asset("new_weights.h5"))
         self.last_input_submitted = time.time()
         self.last_commands = []
         self.last_gesture_commit_timestamp = time.time()

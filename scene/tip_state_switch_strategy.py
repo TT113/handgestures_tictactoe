@@ -13,5 +13,4 @@ class ShowUIStrategyFromData:
         for entry in self.data:
             if entry.begin_seconds < timing < entry.end_seconds:
                 return entry
-
         return None

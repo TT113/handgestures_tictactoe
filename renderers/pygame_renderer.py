@@ -23,7 +23,7 @@ class PyGameRenderer:
 
         self.rendered_numbers = {}
         myfont = resource_loader.get_font()
-        for i in range(0,10):
+        for i in range(0, 30):
             textsurface = myfont.render(str(i), 0, (0, 0, 0))
             self.rendered_numbers[str(i)] = textsurface
 

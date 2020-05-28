@@ -31,8 +31,8 @@ def assemble_and_run_target(name):
     scene_state_subject = PublishSubject(tick_generator)
     if name == 'cv':
         tip_strategy = ShowUIStrategyFromData([
-            UITimingEntry(0, 10, UIState.INITIAL_TIP),
-            UITimingEntry(10, 20, UIState.CALIBRATION)
+            UITimingEntry(0, 20, UIState.INITIAL_TIP),
+            UITimingEntry(20, 30, UIState.CALIBRATION)
         ])
     if name == 'nn':
         tip_strategy = ShowUIStrategyFromData([
@@ -54,7 +54,7 @@ def assemble_and_run_target(name):
 
     if name == 'cv':
         cv_input = CvInputConroller(scene, 1, loader)
-        tick_generator.schedule_delayed_callback(20, lambda: cv_input.calibrate())
+        tick_generator.schedule_delayed_callback(30, lambda: cv_input.calibrate())
         tick_generator.add_subscriber(CameraFrameUpdaterWithDebugBlending(camera_frame_receiver, renderer, cv_input))
 
     if name == 'nn':
@@ -75,7 +75,7 @@ def assemble_and_run_target(name):
     tick_generator.run_ticks()
 
 
-assemble_and_run_target('cv')
+assemble_and_run_target('nn')
 
 
 
