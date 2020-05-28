@@ -76,7 +76,7 @@ def assemble_and_run_target(name):
 
 
 """ specify model target ("nn" - neural network, "cv" - background subtraction model)"""
-assemble_and_run_target('nn')
+assemble_and_run_target('cv')
 
 
 
